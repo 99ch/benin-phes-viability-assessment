@@ -29,25 +29,25 @@ class WatershedDelineator:
             fabdem_path: Chemin vers fichier FABDEM .tif
             sites_file: Fichier CSV avec coordonnées sites PHES
         """
-        print("🗺️ INITIALISATION DÉLIMITEUR BASSINS VERSANTS")
+        print(" INITIALISATION DÉLIMITEUR BASSINS VERSANTS")
         print("=" * 70)
         
         self.fabdem_path = Path(fabdem_path)
         
         if not self.fabdem_path.exists():
-            raise FileNotFoundError(f"❌ FABDEM introuvable: {fabdem_path}")
+            raise FileNotFoundError(f" FABDEM introuvable: {fabdem_path}")
         
-        print(f"✅ FABDEM chargé: {self.fabdem_path.name}")
+        print(f" FABDEM chargé: {self.fabdem_path.name}")
         
         # Charger sites PHES
         self.sites_df = pd.read_csv(sites_file)
         self.sites_df.columns = self.sites_df.columns.str.strip()
         
-        print(f"✅ Sites PHES chargés: {len(self.sites_df)} sites")
+        print(f" Sites PHES chargés: {len(self.sites_df)} sites")
         
         # Vérifier FABDEM
         with rasterio.open(self.fabdem_path) as src:
-            print(f"\n📊 CARACTÉRISTIQUES FABDEM:")
+            print(f"\n CARACTÉRISTIQUES FABDEM:")
             print(f"   Résolution: {src.res[0]:.6f}° (~{src.res[0]*111:.1f} km)")
             print(f"   Dimensions: {src.width} × {src.height} pixels")
             print(f"   Étendue: {src.bounds}")
@@ -58,7 +58,7 @@ class WatershedDelineator:
         Extrait profils d'élévation pour tous les sites
         """
         print(f"\n{'='*70}")
-        print("📈 EXTRACTION PROFILS D'ÉLÉVATION")
+        print(" EXTRACTION PROFILS D'ÉLÉVATION")
         print("=" * 70)
         
         profiles = []
@@ -93,7 +93,7 @@ class WatershedDelineator:
                     diff_upper = elev_upper - elev_upper_csv
                     diff_lower = elev_lower - elev_lower_csv
                     
-                    print(f"\n🎯 {site_id[:50]}")
+                    print(f"\n {site_id[:50]}")
                     print(f"   RÉSERVOIR SUPÉRIEUR:")
                     print(f"      CSV:    {elev_upper_csv:>6.0f} m")
                     print(f"      FABDEM: {elev_upper:>6.0f} m   (Δ = {diff_upper:+.0f} m)")
@@ -116,28 +116,28 @@ class WatershedDelineator:
                         'head_csv': site['Head (m)']
                     })
                 else:
-                    print(f"\n⚠️ {site_id[:50]} - HORS LIMITES FABDEM")
+                    print(f"\n {site_id[:50]} - HORS LIMITES FABDEM")
         
         profiles_df = pd.DataFrame(profiles)
         
         print(f"\n{'='*70}")
-        print("📊 VALIDATION ALTITUDES")
+        print(" VALIDATION ALTITUDES")
         print("=" * 70)
         
         if len(profiles_df) > 0:
             diff_mean = (profiles_df['elev_upper_fabdem'] - profiles_df['elev_upper_csv']).mean()
             diff_std = (profiles_df['elev_upper_fabdem'] - profiles_df['elev_upper_csv']).std()
             
-            print(f"\n🔍 DIFFÉRENCE FABDEM vs CSV (réservoirs supérieurs):")
+            print(f"\n DIFFÉRENCE FABDEM vs CSV (réservoirs supérieurs):")
             print(f"   Moyenne: {diff_mean:+.1f} m")
             print(f"   Écart-type: {diff_std:.1f} m")
             
             if abs(diff_mean) < 20 and diff_std < 30:
-                print(f"   ✅ Cohérence EXCELLENTE (FABDEM validé)")
+                print(f"    Cohérence EXCELLENTE (FABDEM validé)")
             elif abs(diff_mean) < 50:
-                print(f"   ⚠️ Cohérence ACCEPTABLE (vérifier quelques sites)")
+                print(f"    Cohérence ACCEPTABLE (vérifier quelques sites)")
             else:
-                print(f"   ❌ Incohérence IMPORTANTE (vérifier CRS ou datum)")
+                print(f"    Incohérence IMPORTANTE (vérifier CRS ou datum)")
         
         return profiles_df
     
@@ -147,7 +147,7 @@ class WatershedDelineator:
         Méthode rapide sans délimitation complète
         """
         print(f"\n{'='*70}")
-        print("🌍 ESTIMATION BASSINS VERSANTS (Méthode topographique)")
+        print(" ESTIMATION BASSINS VERSANTS (Méthode topographique)")
         print("=" * 70)
         
         catchments = []
@@ -165,7 +165,7 @@ class WatershedDelineator:
                 row, col = src.index(lon, lat)
                 
                 if not (0 <= row < src.height and 0 <= col < src.width):
-                    print(f"⚠️ {site_id[:50]} - Hors limites")
+                    print(f" {site_id[:50]} - Hors limites")
                     continue
                 
                 # Extraire fenêtre autour du site (buffer ~10 km)
@@ -206,7 +206,7 @@ class WatershedDelineator:
                 
                 catchment_area_ha = reservoir_area_ha * factor
                 
-                print(f"\n🎯 {site_id[:50]}")
+                print(f"\n {site_id[:50]}")
                 print(f"   Réservoir: {reservoir_area_ha:>8.0f} ha")
                 print(f"   Pente moyenne: {slope_deg:>5.1f}° ({slope_class})")
                 print(f"   Facteur: ×{factor}")
@@ -225,7 +225,7 @@ class WatershedDelineator:
         catchments_df = pd.DataFrame(catchments)
         
         print(f"\n{'='*70}")
-        print("📊 STATISTIQUES BASSINS VERSANTS ESTIMÉS")
+        print(" STATISTIQUES BASSINS VERSANTS ESTIMÉS")
         print("=" * 70)
         
         if len(catchments_df) > 0:
@@ -257,13 +257,13 @@ class WatershedDelineator:
         if len(profiles_df) > 0:
             profiles_file = output_path / 'elevation_profiles_fabdem.csv'
             profiles_df.to_csv(profiles_file, index=False)
-            print(f"\n💾 Profils sauvegardés: {profiles_file}")
+            print(f"\n Profils sauvegardés: {profiles_file}")
         
         # Sauvegarder bassins versants
         if len(catchments_df) > 0:
             catchments_file = output_path / 'catchment_areas_fabdem_validated.csv'
             catchments_df.to_csv(catchments_file, index=False)
-            print(f"💾 Bassins versants sauvegardés: {catchments_file}")
+            print(f" Bassins versants sauvegardés: {catchments_file}")
             
             # Créer aussi un fichier compatible avec code hydrologique
             update_code_file = output_path / 'update_hydrological_code.txt'
@@ -279,22 +279,22 @@ class WatershedDelineator:
                 f.write("}\n")
                 f.write("'catchment_area_ha': catchment_areas_validated.get(site_id, upper_area_ha * 10)\n")
             
-            print(f"💾 Instructions mise à jour: {update_code_file}")
+            print(f" Instructions mise à jour: {update_code_file}")
         
-        print(f"\n✅ Tous les fichiers sauvegardés dans: {output_path}")
+        print(f"\n Tous les fichiers sauvegardés dans: {output_path}")
 
 
 def main():
     """
     Fonction principale - Analyse FABDEM pour bassins versants
     """
-    print("🌍 ANALYSE FABDEM - DÉLIMITATION BASSINS VERSANTS PHES")
+    print(" ANALYSE FABDEM - DÉLIMITATION BASSINS VERSANTS PHES")
     print("=" * 70)
     print("FABDEM = Forest And Buildings removed DEM")
     print("Avantages vs SRTM:")
-    print("  ✓ Correction végétation (crucial zone tropicale)")
-    print("  ✓ Correction bâtiments")
-    print("  ✓ Précision verticale 2× meilleure")
+    print("   Correction végétation (crucial zone tropicale)")
+    print("   Correction bâtiments")
+    print("   Précision verticale 2× meilleure")
     print("=" * 70)
     
     # Chemins fichiers
@@ -303,8 +303,8 @@ def main():
     
     # Vérifier existence FABDEM
     if not Path(fabdem_path).exists():
-        print(f"\n❌ FABDEM non trouvé: {fabdem_path}")
-        print(f"\n📥 TÉLÉCHARGEMENT FABDEM REQUIS:")
+        print(f"\n FABDEM non trouvé: {fabdem_path}")
+        print(f"\n TÉLÉCHARGEMENT FABDEM REQUIS:")
         print(f"   1. Visiter: https://data.bris.ac.uk/data/dataset/s5hqmjcdj8yo2ibzi9b4ew3sn")
         print(f"   2. Télécharger tuiles couvrant Bénin (10-11°N, 1-2°E):")
         print(f"      - N10E001 (couvre la zone)")
@@ -312,7 +312,7 @@ def main():
         print(f"      - N11E001 (si sites au nord)")
         print(f"   3. Placer dans: data/dem/")
         print(f"   4. Fusionner tuiles si plusieurs (QGIS ou gdal_merge)")
-        print(f"\n💡 Alternative temporaire: Utiliser SRTM en attendant")
+        print(f"\n Alternative temporaire: Utiliser SRTM en attendant")
         return False
     
     try:
@@ -329,13 +329,13 @@ def main():
         delineator.save_results(profiles, catchments)
         
         print(f"\n{'='*70}")
-        print("🎉 ANALYSE FABDEM TERMINÉE")
+        print(" ANALYSE FABDEM TERMINÉE")
         print("=" * 70)
-        print(f"\n✅ Profils d'élévation validés")
-        print(f"✅ Bassins versants estimés avec FABDEM")
-        print(f"✅ Fichiers prêts pour mise à jour code hydrologique")
+        print(f"\n Profils d'élévation validés")
+        print(f" Bassins versants estimés avec FABDEM")
+        print(f" Fichiers prêts pour mise à jour code hydrologique")
         
-        print(f"\n🔄 PROCHAINE ÉTAPE:")
+        print(f"\n PROCHAINE ÉTAPE:")
         print(f"   1. Vérifier fichier: data/validated_parameters/update_hydrological_code.txt")
         print(f"   2. Mettre à jour hydrological_balance_analysis.py ligne 92")
         print(f"   3. Relancer analyse hydrologique avec vrais bassins versants")
@@ -343,7 +343,7 @@ def main():
         return True
         
     except Exception as e:
-        print(f"\n❌ ERREUR: {e}")
+        print(f"\n ERREUR: {e}")
         import traceback
         traceback.print_exc()
         return False
@@ -353,6 +353,6 @@ if __name__ == "__main__":
     success = main()
     
     if success:
-        print(f"\n💡 AMÉLIORATION PRÉCISION ATTENDUE:")
+        print(f"\n AMÉLIORATION PRÉCISION ATTENDUE:")
         print(f"   Bassins versants: ±50% (hypothèse ×10) → ±15% (FABDEM topographique)")
         print(f"   Bilans hydriques: ±40% → ±20% (amélioration significative)")

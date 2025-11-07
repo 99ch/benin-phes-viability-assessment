@@ -62,7 +62,7 @@ def convert_era5_evapotranspiration_units(values, months=None, year=None):
     Returns:
         Array numpy avec évapotranspiration en mm/mois (positive)
     """
-    print("🔧 CONVERSION UNITÉS ERA5 ÉVAPOTRANSPIRATION:")
+    print(" CONVERSION UNITÉS ERA5 ÉVAPOTRANSPIRATION:")
     print("   Découverte: Données mensuelles = moyennes journalières !")
     
     # Diagnostics valeurs brutes
@@ -103,18 +103,18 @@ def convert_era5_evapotranspiration_units(values, months=None, year=None):
     mean_monthly = et0_mm.mean()
     annual_est = et0_mm.sum()
     
-    print(f"\n🔍 VALIDATION CLIMATOLOGIQUE:")
+    print(f"\n VALIDATION CLIMATOLOGIQUE:")
     print(f"   ET₀ mensuel moyen: {mean_monthly:.1f} mm/mois")
     print(f"   ET₀ annuel total: {annual_est:.0f} mm/année")
     
     if 1200 <= annual_est <= 1800:
-        print(f"   ✅ Cohérent avec littérature Bénin (1200-1800 mm/année)")
+        print(f"    Cohérent avec littérature Bénin (1200-1800 mm/année)")
     elif annual_est < 600:
-        print(f"   ⚠️ Valeurs faibles - vérifier données source")
+        print(f"    Valeurs faibles - vérifier données source")
     elif annual_est > 2500:
-        print(f"   ⚠️ Valeurs élevées - vérifier conversion") 
+        print(f"    Valeurs élevées - vérifier conversion") 
     else:
-        print(f"   ⚠️ Hors plage attendue mais acceptable")
+        print(f"    Hors plage attendue mais acceptable")
     
     return et0_mm
 
@@ -129,7 +129,7 @@ def extract_precip_from_chirps_tif(tif_file, sites_coords):
     Returns:
         Dict avec précipitations par site {site_id: precip_mm}
     """
-    print(f"   📁 CHIRPS: {tif_file.name}")
+    print(f"    CHIRPS: {tif_file.name}")
     
     precip_data = {}
     
@@ -153,11 +153,11 @@ def extract_precip_from_chirps_tif(tif_file, sites_coords):
                         precip_data[site_id] = 0.0  # Aucune précipitation
                         
                 else:
-                    print(f"   ⚠️ Site {site_id} hors grille CHIRPS")
+                    print(f"    Site {site_id} hors grille CHIRPS")
                     precip_data[site_id] = 0.0
                     
             except Exception as e:
-                print(f"   ❌ Erreur site {site_id}: {e}")
+                print(f"    Erreur site {site_id}: {e}")
                 precip_data[site_id] = 0.0
     
     return precip_data
@@ -173,14 +173,14 @@ def extract_et0_from_era5_tif(tif_file, sites_coords):
     Returns:
         DataFrame avec données ET₀ mensuelles par site
     """
-    print(f"\n📁 TRAITEMENT: {tif_file.name}")
+    print(f"\n TRAITEMENT: {tif_file.name}")
     
     year = int(tif_file.stem.split('_')[-1])
     site_data = []
     
     with rasterio.open(tif_file) as src:
-        print(f"   📊 Résolution: {src.res}° ({src.width}×{src.height} pixels)")
-        print(f"   📊 Bandes: {src.count} (12 mois attendus)")
+        print(f"    Résolution: {src.res}° ({src.width}×{src.height} pixels)")
+        print(f"    Bandes: {src.count} (12 mois attendus)")
         
         # Lire toutes les bandes (12 mois)
         all_bands = src.read()  # Shape: (12, height, width)
@@ -214,13 +214,13 @@ def extract_et0_from_era5_tif(tif_file, sites_coords):
                         })
                 
                 else:
-                    print(f"   ⚠️ Site {site_id} hors grille ({lat:.3f}°N, {lon:.3f}°E)")
+                    print(f"    Site {site_id} hors grille ({lat:.3f}°N, {lon:.3f}°E)")
                     
             except Exception as e:
-                print(f"   ❌ Erreur site {site_id}: {e}")
+                print(f"    Erreur site {site_id}: {e}")
                 continue
     
-    print(f"   ✅ {len(site_data)} enregistrements créés")
+    print(f"    {len(site_data)} enregistrements créés")
     return pd.DataFrame(site_data)
 
 def integrate_chirps_precipitation_data(df, sites_coords):
@@ -234,13 +234,13 @@ def integrate_chirps_precipitation_data(df, sites_coords):
     Returns:
         DataFrame avec P_mean et balance complétés
     """
-    print(f"\n🌧️ INTÉGRATION DONNÉES CHIRPS")
+    print(f"\n INTÉGRATION DONNÉES CHIRPS")
     print("=" * 50)
     
     chirps_dir = DATA_DIR / "chirps"
     
     if not chirps_dir.exists():
-        print(f"❌ Dossier CHIRPS non trouvé: {chirps_dir}")
+        print(f" Dossier CHIRPS non trouvé: {chirps_dir}")
         return df
     
     # Recherche fichiers CHIRPS TIF
@@ -248,10 +248,10 @@ def integrate_chirps_precipitation_data(df, sites_coords):
     chirps_files.sort()
     
     if not chirps_files:
-        print(f"❌ Aucun fichier CHIRPS trouvé dans {chirps_dir}")
+        print(f" Aucun fichier CHIRPS trouvé dans {chirps_dir}")
         return df
     
-    print(f"📁 {len(chirps_files)} fichiers CHIRPS trouvés")
+    print(f" {len(chirps_files)} fichiers CHIRPS trouvés")
     
     # Traiter chaque fichier CHIRPS et intégrer dans DataFrame
     for chirps_file in chirps_files:
@@ -283,7 +283,7 @@ def integrate_chirps_precipitation_data(df, sites_coords):
                         df.loc[mask, 'data_source'] = 'ERA5_Standard_ET0+CHIRPS'
                         
         except Exception as e:
-            print(f"   ❌ Erreur traitement {chirps_file.name}: {e}")
+            print(f"    Erreur traitement {chirps_file.name}: {e}")
             continue
     
     # Statistiques intégration
@@ -291,7 +291,7 @@ def integrate_chirps_precipitation_data(df, sites_coords):
     records_with_precip = len(df[df['P_mean'].notna()])
     integration_rate = (records_with_precip / total_records) * 100 if total_records > 0 else 0
     
-    print(f"\n📊 RÉSULTATS INTÉGRATION CHIRPS:")
+    print(f"\n RÉSULTATS INTÉGRATION CHIRPS:")
     print(f"   Total enregistrements: {total_records}")
     print(f"   Avec précipitations: {records_with_precip}")
     print(f"   Taux intégration: {integration_rate:.1f}%")
@@ -300,12 +300,12 @@ def integrate_chirps_precipitation_data(df, sites_coords):
         precip_stats = df['P_mean'].describe()
         balance_stats = df['balance'].describe()
         
-        print(f"\n🌧️ STATISTIQUES PRÉCIPITATIONS:")
+        print(f"\n STATISTIQUES PRÉCIPITATIONS:")
         print(f"   Min: {precip_stats['min']:.1f} mm/mois")
         print(f"   Moyenne: {precip_stats['mean']:.1f} mm/mois") 
         print(f"   Max: {precip_stats['max']:.1f} mm/mois")
         
-        print(f"\n⚖️ STATISTIQUES BILAN P-E:")
+        print(f"\n STATISTIQUES BILAN P-E:")
         print(f"   Min: {balance_stats['min']:.1f} mm/mois")
         print(f"   Moyenne: {balance_stats['mean']:.1f} mm/mois")
         print(f"   Max: {balance_stats['max']:.1f} mm/mois")
@@ -315,13 +315,13 @@ def integrate_chirps_precipitation_data(df, sites_coords):
         total_months = len(df[df['balance'].notna()])
         positive_rate = (positive_balance_months / total_months) * 100 if total_months > 0 else 0
         
-        print(f"\n✅ VALIDATION CLIMATOLOGIQUE:")
+        print(f"\n VALIDATION CLIMATOLOGIQUE:")
         print(f"   Mois bilan positif: {positive_balance_months}/{total_months} ({positive_rate:.1f}%)")
         
         if 20 <= positive_rate <= 60:
-            print(f"   ✅ Cohérent avec climat tropical Bénin")
+            print(f"    Cohérent avec climat tropical Bénin")
         else:
-            print(f"   ⚠️ Taux inhabituel pour climat Bénin")
+            print(f"    Taux inhabituel pour climat Bénin")
     
     return df
 
@@ -329,10 +329,10 @@ def process_all_era5_standard_files():
     """
     Traite tous les fichiers ERA5 TIF standard
     """
-    print("🚀 TRAITEMENT ERA5 STANDARD - ÉVAPOTRANSPIRATION")
+    print(" TRAITEMENT ERA5 STANDARD - ÉVAPOTRANSPIRATION")
     print("=" * 60)
-    print("📋 Source: Produit officiel ECMWF")
-    print("📋 Méthode: Conversion scientifique selon documentation")
+    print(" Source: Produit officiel ECMWF")
+    print(" Méthode: Conversion scientifique selon documentation")
     print("=" * 60)
     
     # Chemins
@@ -341,17 +341,17 @@ def process_all_era5_standard_files():
     
     # Chargement sites
     sites_coords = load_phes_sites_coordinates()
-    print(f"✅ {len(sites_coords)} sites PHES chargés")
+    print(f" {len(sites_coords)} sites PHES chargés")
     
     # Recherche fichiers TIF
     tif_files = list(era5_dir.glob("era5_*.tif"))
     tif_files = sorted([f for f in tif_files if f.name.count('_') == 1])  # era5_YYYY.tif
     
     if not tif_files:
-        print(f"❌ Aucun fichier TIF ERA5 trouvé dans {era5_dir}")
+        print(f" Aucun fichier TIF ERA5 trouvé dans {era5_dir}")
         return False
     
-    print(f"📁 {len(tif_files)} fichiers ERA5 TIF trouvés")
+    print(f" {len(tif_files)} fichiers ERA5 TIF trouvés")
     
     # Traitement fichier par fichier
     all_data = []
@@ -363,20 +363,20 @@ def process_all_era5_standard_files():
             all_data.append(file_data)
     
     if not all_data:
-        print("❌ Aucune donnée ET₀ extraite")
+        print(" Aucune donnée ET₀ extraite")
         return False
     
     # Concaténation données ERA5
     final_df = pd.concat(all_data, ignore_index=True)
     final_df = final_df.sort_values(['id', 'year', 'month']).reset_index(drop=True)
     
-    print(f"\n✅ Données ERA5 ET₀ compilées: {len(final_df)} enregistrements")
+    print(f"\n Données ERA5 ET₀ compilées: {len(final_df)} enregistrements")
     
     # INTÉGRATION DONNÉES CHIRPS
     final_df = integrate_chirps_precipitation_data(final_df, sites_coords)
     
     # Statistiques finales intégrées
-    print(f"\n📊 DONNÉES INTÉGRÉES ERA5+CHIRPS GÉNÉRÉES:")
+    print(f"\n DONNÉES INTÉGRÉES ERA5+CHIRPS GÉNÉRÉES:")
     print(f"   Total enregistrements: {len(final_df)}")
     print(f"   Sites: {final_df['id'].nunique()}")
     print(f"   Années: {final_df['year'].nunique()}")
@@ -384,7 +384,7 @@ def process_all_era5_standard_files():
     
     # Validation finale ET₀
     et0_stats = final_df['E_mean'].describe()
-    print(f"\n🔍 STATISTIQUES ET₀ FINALES:")
+    print(f"\n STATISTIQUES ET₀ FINALES:")
     print(f"   Min: {et0_stats['min']:.1f} mm/mois")
     print(f"   Moyenne: {et0_stats['mean']:.1f} mm/mois")
     print(f"   Max: {et0_stats['max']:.1f} mm/mois")
@@ -396,7 +396,7 @@ def process_all_era5_standard_files():
     # Validation finale Précipitations (si disponibles)
     if 'P_mean' in final_df.columns and final_df['P_mean'].notna().any():
         precip_stats = final_df['P_mean'].describe()
-        print(f"\n🌧️ STATISTIQUES PRÉCIPITATIONS FINALES:")
+        print(f"\n STATISTIQUES PRÉCIPITATIONS FINALES:")
         print(f"   Min: {precip_stats['min']:.1f} mm/mois")
         print(f"   Moyenne: {precip_stats['mean']:.1f} mm/mois")
         print(f"   Max: {precip_stats['max']:.1f} mm/mois")
@@ -408,7 +408,7 @@ def process_all_era5_standard_files():
     # Validation finale Bilan P-E (si disponible)
     if 'balance' in final_df.columns and final_df['balance'].notna().any():
         balance_stats = final_df['balance'].describe()
-        print(f"\n⚖️ STATISTIQUES BILAN P-E FINALES:")
+        print(f"\n STATISTIQUES BILAN P-E FINALES:")
         print(f"   Min: {balance_stats['min']:.1f} mm/mois")
         print(f"   Moyenne: {balance_stats['mean']:.1f} mm/mois")
         print(f"   Max: {balance_stats['max']:.1f} mm/mois")
@@ -419,17 +419,17 @@ def process_all_era5_standard_files():
         
         # Validation climatologique bilan
         if annual_balance_mean < -500:
-            print(f"   ⚠️ Déficit hydrique important (attendu climat semi-aride)")
+            print(f"    Déficit hydrique important (attendu climat semi-aride)")
         elif -500 <= annual_balance_mean <= 0:
-            print(f"   ✅ Déficit modéré cohérent climat tropical")
+            print(f"    Déficit modéré cohérent climat tropical")
         else:
-            print(f"   ✅ Excès hydrique cohérent climat humide")
+            print(f"    Excès hydrique cohérent climat humide")
     
     # Sauvegarde
     output_file.parent.mkdir(parents=True, exist_ok=True)
     final_df.to_csv(output_file, index=False)
     
-    print(f"\n💾 DONNÉES SAUVEGARDÉES: {output_file}")
+    print(f"\n DONNÉES SAUVEGARDÉES: {output_file}")
     
     return True
 
@@ -439,16 +439,16 @@ def main():
     success = process_all_era5_standard_files()
     
     if success:
-        print(f"\n🎉 TRAITEMENT ERA5+CHIRPS INTÉGRÉ TERMINÉ!")
+        print(f"\n TRAITEMENT ERA5+CHIRPS INTÉGRÉ TERMINÉ!")
         print("=" * 50)
-        print("✅ Évapotranspiration ERA5 scientifique appliquée")
-        print("✅ Précipitations CHIRPS intégrées")
-        print("✅ Bilan P-E complet et réaliste")
-        print("✅ Documentation ECMWF + CHIRPS respectée") 
-        print("✅ Fichier: site_stats_era5_standard.csv")
-        print("🔄 Prêt pour analyses PHES avec données complètes")
+        print(" Évapotranspiration ERA5 scientifique appliquée")
+        print(" Précipitations CHIRPS intégrées")
+        print(" Bilan P-E complet et réaliste")
+        print(" Documentation ECMWF + CHIRPS respectée") 
+        print(" Fichier: site_stats_era5_standard.csv")
+        print(" Prêt pour analyses PHES avec données complètes")
     else:
-        print(f"\n❌ Échec traitement ERA5 standard")
+        print(f"\n Échec traitement ERA5 standard")
 
 if __name__ == "__main__":
     main()
