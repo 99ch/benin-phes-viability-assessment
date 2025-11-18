@@ -1,0 +1,25 @@
+# Environnements virtuels et variables locales
+.venv/
+.env
+.env.*
+
+# Fichiers Python temporaires
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Artefacts système
+.DS_Store
+Thumbs.db
+
+# Données volumineuses locales
+/data/
+/n10_e001/
+
+# Notebooks et sorties temporaires
+.ipynb_checkpoints/
+*.log
+
+# Artefacts de packaging
+*.egg-info/

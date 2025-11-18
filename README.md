@@ -1,52 +1,54 @@
-# Closed-Loop Pumped Hydro Storage Potential in Benin
+# Étude de faisabilité des systèmes PHES en boucle fermée – Bénin
 
-## Description
+Ce dépôt regroupe les données et scripts nécessaires pour évaluer la faisabilité technique,
+économique et hydrologique de sites PHES (Pumped Hydro Energy Storage) identifiés dans
+la région de l’Atacora.
 
-This project assesses the hydrological viability of closed-loop Pumped Hydro Energy Storage (PHES) sites in Benin. It employs a probabilistic approach combining Monte Carlo simulations and Analytic Hierarchy Process (AHP) to identify and prioritize candidate sites in a semi-arid context.
+## Objectifs du projet
+- **Détection des sites** à partir du modèle numérique de terrain FABDEM (30 m).
+- **Modélisation du bilan hydrique (2002-2023)** via les jeux de données CHIRPS et ERA5.
+- **Simulation Monte Carlo (10 000 itérations/site)** pour estimer la probabilité d’autonomie hydrique.
+- **Classement multicritère (AHP)** intégrant dimensions économiques, hydrologiques et environnementales.
 
-## Repository Contents
-
-- **process_era5_standard_evapotranspiration.py** : ERA5 data processing script
-- **data/** : Climate and geospatial data directory
-  - `era5/` : ERA5 reanalysis data (evapotranspiration)
-  - `chirps/` : CHIRPS precipitation data
-- **output/** : Statistical analysis and Monte Carlo results
-
-
-## Methodology
-
-1. **Site Identification** : FABDEM-based algorithm to detect viable reservoir pairs
-2. **Hydrological Modeling** : Monthly water balance (2002-2023) integrating runoff, evaporation, and seepage
-3. **Monte Carlo Simulation** : 10,000 iterations per site to quantify uncertainty
-4. **AHP Prioritization** : Multi-criteria weighting (hydrology 40%, economics 30%, technical 20%, environmental 10%)
-
-## Key Results
-
-- 12 PHES sites identified in northern Benin (15-500 GWh)
-- Structural hydrological deficit for all sites (negative deterministic balances)
-- Maximum viability probability: 36.6% (15 GWh sites)
-- Seepage (5-20% of volume) accounts for 49-82% of total losses
-
-## Requirements
-
-```bash
-# Python 3.9+
-pip install numpy pandas xarray cfgrib
+## Structure actuelle
+```
+.
+├── data/                       # Données brutes (FABDEM, CHIRPS, ERA5, fiches sites)
+├── n10_e001/                   # Exports détaillés pour différents niveaux de stockage
+├── src/phes_assessment/        # Code Python (ingestion, analyse, pipelines)
+├── pyproject.toml              # Dépendances et configuration du projet
+└── README.md                   # Ce fichier
 ```
 
-## Usage
-
+## Installation
+1. Créez un environnement virtuel Python (>=3.10) et activez-le.
+2. Installez les dépendances de base :
 ```bash
-# Process ERA5 data
-python process_era5_standard_evapotranspiration.py
+pip install -e .
+```
+3. Pour disposer des outils avancés (géotraitement complet) :
+```bash
+pip install -e .[full]
+```
 
+## Premier outil disponible
+Le module `phes-data` (alias `phes_assessment.cli`) inventorie les jeux de
+données présents localement et vérifie leur couverture temporelle.
 
-## Data Sources
+Exemple d’exécution :
+```bash
+python -m phes_assessment.cli
+```
+ou, après installation, simplement :
+```bash
+phes-data
+```
+La commande renvoie le nombre de rasters détectés, les dates de début/fin
+et les métadonnées de projection/résolution. Si une colonne affiche `-`,
+vérifiez que les fichiers (ex. FABDEM) ont bien été décompressés dans
+`data/`.
 
-Climate (ERA5, CHIRPS) and topographic (FABDEM) data are available from:
-
-- ERA5 : [Copernicus Climate Data Store](https://cds.climate.copernicus.eu/)
-- CHIRPS : [Climate Hazards Center](https://www.chc.ucsb.edu/data/chirps)
-- FABDEM : [University of Bristol](https://data.bris.ac.uk/data/dataset/s5hqmjcdj8yo2ibzi9b4ew3sn)
-
-
+## Étapes suivantes
+- Implémenter les fonctions de lecture et de validation des jeux FABDEM/CHIRPS/ERA5.
+- Automatiser la génération des indicateurs hydrologiques intermédiaires.
+- Documenter les pipelines (Snakemake/Prefect) pour la reproductibilité.
