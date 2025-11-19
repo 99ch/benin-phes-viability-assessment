@@ -110,6 +110,28 @@ La sortie est écrite au format demandé : `.parquet` si un moteur
 (`pyarrow`/`fastparquet`) est disponible, sinon CSV. Par défaut, le fichier
 `results/climate_series.csv` est généré.
 
+### Exporter les masques GeoJSON des sites
+
+Pour faciliter la visualisation ou le post-traitement (SIG/QGIS), il est désormais
+possible d’exporter directement les buffers circulaires générés autour de chaque
+réservoir au format GeoJSON :
+
+```bash
+python -m phes_assessment.cli site-masks --output results/site_masks.geojson
+```
+
+Ceci crée un fichier `FeatureCollection` contenant un polygone par `pair_identifier`
+avec, dans les métadonnées, le rayon utilisé et l’EPSG de projection choisi pour le
+buffer.
+
+Options disponibles :
+
+- `--sites` pour pointer vers un CSV alternatif ;
+- `--buffer-meters` afin de redéfinir le rayon (mètres) appliqué autour de chaque
+	réservoir ;
+- `--utm-epsg` pour choisir l’EPSG de la projection métrique temporaire ;
+- `--output` pour définir le fichier GeoJSON cible (par défaut `results/site_masks.geojson`).
+
 ## Étapes suivantes
 
 - Implémenter les fonctions de lecture et de validation des jeux FABDEM/CHIRPS/ERA5.

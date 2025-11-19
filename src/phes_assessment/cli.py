@@ -14,6 +14,7 @@ from .catalog import summarize_directory
 from .config import get_paths
 from .climate import aggregate_series, export_series
 from .fabdem import DEFAULT_SITES_FILE, sample_sites, summarize_head_gaps
+from .sites import build_site_masks, export_masks_geojson, load_sites
 
 app = typer.Typer(help="Outils CLI pour l'étude PHES")
 console = Console()
@@ -163,6 +164,30 @@ def climate_series(
             dataframe=df,
         )
         console.print(f"Séries sauvegardées dans {actual}")
+
+
+@app.command()
+def site_masks(
+    root: Optional[Path] = typer.Option(None, "--root", help="Chemin vers la racine du dépôt"),
+    sites_csv: Optional[Path] = typer.Option(None, "--sites", help="CSV des sites"),
+    output: Path = typer.Option(Path("results/site_masks.geojson"), help="Fichier GeoJSON de sortie"),
+    buffer_meters: float = typer.Option(500.0, help="Rayon du buffer pour chaque réservoir (m)", show_default=True),
+    utm_epsg: int = typer.Option(32631, help="Code EPSG utilisé pour projeter les points", show_default=True),
+) -> None:
+    """Exporte les buffers de chaque site PHES sous forme de GeoJSON."""
+
+    paths = get_paths(root)
+    csv_path = sites_csv or (paths.data_dir / DEFAULT_SITES_FILE)
+    df = load_sites(csv_path)
+    masks = build_site_masks(df, buffer_meters=buffer_meters, utm_epsg=utm_epsg)
+    metadata = {
+        "buffer_meters": buffer_meters,
+        "utm_epsg": utm_epsg,
+        "site_count": len(masks),
+        "source_csv": str(csv_path),
+    }
+    geojson_path = export_masks_geojson(output, masks, metadata=metadata)
+    console.print(f"{len(masks)} masques exportés dans {geojson_path}")
 
 
 def main() -> None:

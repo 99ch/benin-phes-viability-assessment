@@ -1,9 +1,11 @@
 """Utilitaires liés aux sites PHES (géométries, buffers, etc.)."""
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, List
+from typing import Any, Dict, Iterable, List
 
 import pandas as pd
 from pyproj import Transformer
@@ -63,3 +65,40 @@ def build_site_masks(df: pd.DataFrame, buffer_meters: float = 500.0, utm_epsg: i
         geometry = unary_union(buffers)
         masks.append(SiteMask(pair_identifier=str(row["Pair Identifier"]), geometry=geometry))
     return masks
+
+
+def feature_collection_from_masks(
+    masks: Iterable[SiteMask],
+    metadata: Dict[str, Any] | None = None,
+) -> Dict[str, Any]:
+    """Construit une FeatureCollection GeoJSON optionnellement enrichie de métadonnées."""
+
+    mask_list = list(masks)
+    features = [mask.as_geojson() for mask in mask_list]
+    collection: Dict[str, Any] = {
+        "type": "FeatureCollection",
+        "features": features,
+    }
+    if features:
+        union = unary_union([mask.geometry for mask in mask_list])
+        if not union.is_empty:
+            collection["bbox"] = list(union.bounds)
+    if metadata:
+        collection["metadata"] = metadata
+    return collection
+
+
+def export_masks_geojson(
+    output: Path,
+    masks: List[SiteMask],
+    metadata: Dict[str, Any] | None = None,
+    indent: int = 2,
+) -> Path:
+    """Exporte une liste de masques vers un fichier GeoJSON."""
+
+    enriched_metadata = dict(metadata) if metadata else {}
+    enriched_metadata.setdefault("generated_at", datetime.now(timezone.utc).isoformat())
+    collection = feature_collection_from_masks(masks, metadata=enriched_metadata)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(json.dumps(collection, ensure_ascii=False, indent=indent), encoding="utf-8")
+    return output
