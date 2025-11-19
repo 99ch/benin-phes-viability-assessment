@@ -74,6 +74,42 @@ catalogue, le head issu de FABDEM et l’écart entre les deux. L’option
 `--output` (facultative) permet de sauvegarder le tableau complet
 enrichi des altitudes dans un CSV.
 
+### Générer les séries climatiques CHIRPS/ERA5
+
+```bash
+# période complète 2002-2023, sortie CSV par défaut
+python -m phes_assessment.cli climate-series --output results/climate_series.csv
+
+# exemple : ERA5 uniquement sur 2008-2010 avec buffers de 1.5 km
+python -m phes_assessment.cli climate-series \
+    --dataset era5 \
+    --start-year 2008 --end-year 2010 \
+    --buffer-meters 1500 \
+    --output results/era5_2008_2010.parquet
+```
+
+La commande :
+
+- construit automatiquement des **buffers circulaires** (rayon configurable, 500 m par défaut)
+	autour des réservoirs upper/lower décrits dans le CSV, fusionne les polygones
+	par paire et applique systématiquement un paramètre `all_touched` pour s’assurer
+	que les pixels de bord sont intégrés ;
+- parcourt uniquement les rasters CHIRPS (précipitations) et/ou ERA5 (évapotranspiration)
+	qui tombent dans la fenêtre temporelle demandée et calcule la moyenne spatiale
+	à l’intérieur de chaque polygone (progress bar Rich affichée pendant le traitement) ;
+- exporte un tableau `pair_identifier × date` avec les colonnes `precip_mm` et `etp_mm`.
+
+Paramètres principaux :
+
+- `--dataset {both,chirps,era5}` pour choisir la ou les sources à agréger ;
+- `--start-year` et `--end-year` pour borner l’analyse (2002‑2023 par défaut) ;
+- `--buffer-meters` pour ajuster le rayon spatial (en mètres) autour de chaque réservoir ;
+- `--sites` pour pointer vers un CSV spécifique si besoin.
+
+La sortie est écrite au format demandé : `.parquet` si un moteur
+(`pyarrow`/`fastparquet`) est disponible, sinon CSV. Par défaut, le fichier
+`results/climate_series.csv` est généré.
+
 ## Étapes suivantes
 
 - Implémenter les fonctions de lecture et de validation des jeux FABDEM/CHIRPS/ERA5.

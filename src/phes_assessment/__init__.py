@@ -5,4 +5,6 @@ __all__ = [
     "io",
     "cli",
     "fabdem",
+    "climate",
+    "sites",
 ]
