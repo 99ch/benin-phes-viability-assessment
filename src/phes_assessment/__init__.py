@@ -7,4 +7,5 @@ __all__ = [
     "fabdem",
     "climate",
     "sites",
+    "qa",
 ]

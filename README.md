@@ -110,6 +110,21 @@ La sortie est écrite au format demandé : `.parquet` si un moteur
 (`pyarrow`/`fastparquet`) est disponible, sinon CSV. Par défaut, le fichier
 `results/climate_series.csv` est généré.
 
+### Contrôler la complétude des datasets
+
+La commande `data-qa` exécute un diagnostic rapide sur les dossiers CHIRPS, ERA5
+et FABDEM : couverture temporelle réelle vs attendue, mois/années manquants,
+doublons potentiels et emprise FABDEM par rapport aux coordonnées des sites.
+
+```bash
+python -m phes_assessment.cli data-qa --start-year 2002 --end-year 2023
+```
+
+Options utiles : `--sites` pour utiliser un CSV spécifique (vérification
+emprise), `--start-year` / `--end-year` pour ajuster la fenêtre attendue. La
+sortie affiche un tableau synthétique facilitant les contrôles avant d’alimenter
+les pipelines.
+
 ### Exporter les masques GeoJSON des sites
 
 Pour faciliter la visualisation ou le post-traitement (SIG/QGIS), il est désormais

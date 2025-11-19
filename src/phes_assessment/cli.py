@@ -14,6 +14,7 @@ from .catalog import summarize_directory
 from .config import get_paths
 from .climate import aggregate_series, export_series
 from .fabdem import DEFAULT_SITES_FILE, sample_sites, summarize_head_gaps
+from .qa import run_quality_checks
 from .sites import build_site_masks, export_masks_geojson, load_sites
 
 app = typer.Typer(help="Outils CLI pour l'étude PHES")
@@ -52,6 +53,48 @@ def data_catalog(root: Optional[Path] = typer.Option(None, "--root", help="Chemi
 
     console.print(table)
     console.print(f"Date d'exécution : {datetime.now():%Y-%m-%d %H:%M:%S}")
+
+
+@app.command()
+def data_qa(
+    root: Optional[Path] = typer.Option(None, "--root", help="Chemin vers la racine du dépôt"),
+    sites_csv: Optional[Path] = typer.Option(None, "--sites", help="CSV des sites pour vérifier l'emprise FABDEM"),
+    start_year: int = typer.Option(2002, help="Année attendue de début pour les climatologies", show_default=True),
+    end_year: int = typer.Option(2023, help="Année attendue de fin pour les climatologies", show_default=True),
+) -> None:
+    """Exécute des contrôles qualité rapides sur CHIRPS, ERA5 et FABDEM."""
+
+    paths = get_paths(root)
+    csv_path = sites_csv or (paths.data_dir / DEFAULT_SITES_FILE)
+    reports = run_quality_checks(paths, start_year=start_year, end_year=end_year, sites_csv=csv_path)
+
+    table = Table(title="Contrôles qualité datasets", header_style="bold magenta")
+    table.add_column("Dataset")
+    table.add_column("Fichiers", justify="right")
+    table.add_column("Couverture réelle")
+    table.add_column("Couverture attendue")
+    table.add_column("Manquants")
+    table.add_column("Doublons")
+    table.add_column("Notes")
+
+    for report in reports:
+        coverage_real = "-"
+        if report.coverage_start and report.coverage_end:
+            coverage_real = f"{report.coverage_start:%Y-%m} → {report.coverage_end:%Y-%m}"
+        coverage_expected = "-"
+        if report.expected_start and report.expected_end:
+            coverage_expected = f"{report.expected_start:%Y-%m} → {report.expected_end:%Y-%m}"
+        table.add_row(
+            report.dataset,
+            str(report.file_count),
+            coverage_real,
+            coverage_expected,
+            report.missing_label(),
+            report.duplicate_label(),
+            report.notes_label(),
+        )
+
+    console.print(table)
 
 
 @app.command()
