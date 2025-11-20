@@ -12,6 +12,7 @@ import pandas as pd
 import rasterio
 from rasterio.mask import mask as rasterio_mask
 
+from .basins import load_site_basins
 from .config import DataPaths, get_paths
 from .sites import build_site_masks, load_sites
 
@@ -91,6 +92,7 @@ def aggregate_series(
     sites_csv: Path | None = None,
     dataset: str = "both",
     buffer_meters: float = 500.0,
+    basins_geojson: Path | None = None,
     start_date: date | None = None,
     end_date: date | None = None,
     on_raster_processed: Callable[[str, Path], None] | None = None,
@@ -100,8 +102,18 @@ def aggregate_series(
     paths = paths or get_paths()
     csv_path = sites_csv or (paths.data_dir / "n10_e001_12_sites_complete.csv")
     df_sites = load_sites(csv_path)
-    site_masks = build_site_masks(df_sites, buffer_meters=buffer_meters)
-    geometries = {mask.pair_identifier: mask.geometry.__geo_interface__ for mask in site_masks}
+    if basins_geojson:
+        basin_map = load_site_basins(basins_geojson)
+        site_pairs = [str(pair) for pair in df_sites["Pair Identifier"].tolist()]
+        missing = [pair for pair in site_pairs if pair not in basin_map]
+        if missing:
+            raise ValueError(
+                "Basins manquants pour les sites suivants : " + ", ".join(missing)
+            )
+        geometries = {pair: basin_map[pair].geometry.__geo_interface__ for pair in site_pairs}
+    else:
+        site_masks = build_site_masks(df_sites, buffer_meters=buffer_meters)
+        geometries = {mask.pair_identifier: mask.geometry.__geo_interface__ for mask in site_masks}
 
     records: Dict[Tuple[str, date], Dict[str, float]] = defaultdict(dict)
 
@@ -178,6 +190,7 @@ def export_series(
     sites_csv: Path | None = None,
     dataset: str = "both",
     buffer_meters: float = 500.0,
+    basins_geojson: Path | None = None,
     start_date: date | None = None,
     end_date: date | None = None,
     dataframe: pd.DataFrame | None = None,
@@ -189,6 +202,7 @@ def export_series(
             sites_csv,
             dataset,
             buffer_meters=buffer_meters,
+            basins_geojson=basins_geojson,
             start_date=start_date,
             end_date=end_date,
         )
