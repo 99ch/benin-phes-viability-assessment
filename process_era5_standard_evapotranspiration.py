@@ -1,454 +1,403 @@
-#!/usr/bin/env python3
-"""
-TRAITEMENT ERA5 STANDARD - ÉVAPOTRANSPIRATION SCIENTIFIQUEMENT CORRECTE
-Conversion selon documentation officielle ECMWF
-"""
+#!/usr/bin/env python3#!/usr/bin/env python3
+
+"""Pipeline de traitement ERA5 → GeoTIFF multi-bandes (ETP standardisée)."""Traitement ERA5/CHIRPS standard (version harmonisée).
+
+
+
+Ce script fournit deux commandes complémentaires :Ce script conserve le point d'entrée historique mais délègue désormais
+
+entièrement au module `phes_assessment.climate` afin d'éviter tout
+
+- ``download`` : télécharge les champs horaires ERA5 (single levels) via l'APIéchantillonnage « pixel unique » et garantir une cohérence parfaite avec
+
+  Copernicus CDS pour la zone d'étude et la période choisie ;les commandes CLI (`phes-data climate-series`).
+
+- ``convert`` : convertit un NetCDF ERA5 (ou un dossier de NetCDF) en GeoTIFF"""
+
+  annuel compatible avec ``phes_assessment.climate`` (12 bandes mensuelles,from __future__ import annotations
+
+  unités en millimètres).
+
+from pathlib import Path
+
+L'objectif est de garantir une reproductibilité parfaite des rastersfrom typing import Optional
+
+``data/era5/era5_YYYY.tif`` utilisés par ``phes-data climate-series``.
+
+import pandas as pd
+
+Exemples d'usage :import typer
+
+from rich.console import Console
+
+.. code-block:: bashfrom rich.table import Table
+
+
+
+    # 1) Télécharger les fichiers NetCDF horaires pour 2020-2023from phes_assessment.climate import aggregate_series, export_series
+
+    python process_era5_standard_evapotranspiration.py download \from phes_assessment.config import get_paths
+
+        --start-year 2020 --end-year 2023 \
+
+        --north 12.5 --west 0.0 --south 9.0 --east 3.0 \DEFAULT_SITES = "n10_e001_12_sites_complete.csv"
+
+        --output-dir data/era5/raw
+
+app = typer.Typer(help="Génère les séries climatiques ERA5/CHIRPS via les utilitaires officiels")
+
+    # 2) Convertir chaque NetCDF en GeoTIFF multi-bandes (mm/mois)console = Console()
+
+    python process_era5_standard_evapotranspiration.py convert \
+
+        --source data/era5/raw/era5_2020.nc \
+
+        --output data/era5/era5_2020.tif@app.command()
+
+def main(
+
+    # 3) Conversion en lot d'un dossier complet    root: Optional[Path] = typer.Option(None, "--root", help="Chemin vers la racine du dépôt"),
+
+    python process_era5_standard_evapotranspiration.py convert \    sites_csv: Optional[Path] = typer.Option(None, "--sites", help="CSV des sites (défaut: data/n10_e001_12_sites_complete.csv)"),
+
+        --source data/era5/raw \    basins: Optional[Path] = typer.Option(None, "--basins", help="GeoJSON des bassins versants"),
+
+        --output-dir data/era5    output: Path = typer.Option(Path("results/site_stats_era5_standard.parquet"), help="Fichier de sortie (csv/parquet)"),
+
+    start_year: Optional[int] = typer.Option(2002, help="Année de début (None = tout l'historique)", show_default=True),
+
+Les valeurs ERA5 de ``potential_evaporation`` sont fournies en mètres et    end_year: Optional[int] = typer.Option(2023, help="Année de fin (None = tout l'historique)", show_default=True),
+
+négatives (flux sortant). Nous appliquons donc par défaut un facteur ``-1000``    buffer_meters: float = typer.Option(500.0, help="Rayon des buffers lorsqu'aucun bassin n'est fourni", show_default=True),
+
+(pour obtenir des millimètres positifs) puis un agrégat ``sum`` par mois.    geometry_mode: str = typer.Option(
+
+"""        "auto",
+
+from __future__ import annotations        help="auto = basins si disponible, sinon buffers ; on peut forcer 'basins' ou 'buffers'",
+
+        show_default=True,
+
+import sys    ),
+
+from dataclasses import dataclass) -> None:
+
+from pathlib import Path    """Produit des séries climatiques cohérentes avec le pipeline principal."""
+
+from typing import Iterable, Optional
+
+    paths = get_paths(root)
+
+import numpy as np    csv_path = _resolve_path(paths.data_dir / DEFAULT_SITES, sites_csv, paths.root)
+
+import pandas as pd    basins_path = _resolve_path(None, basins, paths.root) if basins else None
 
 import rasterio
-import numpy as np
-import pandas as pd
-from pathlib import Path
-import xarray as xr
-import glob
-import calendar
-from collections.abc import Sequence
 
-DEFAULT_DAYS_IN_MONTH = (31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
-REPO_ROOT = Path(__file__).resolve().parent
-DATA_DIR = REPO_ROOT / "data"
-OUTPUT_DIR = DATA_DIR / "output"
+import typer    start_date = pd.Timestamp(start_year, 1, 1) if start_year else None
 
-def load_phes_sites_coordinates():
-    """
-    Charge les coordonnées des 12 sites PHES
-    """
-    sites_file = DATA_DIR / "n10_e001_12_sites_complete.csv"
-    sites_df = pd.read_csv(sites_file)
-    
-    coords = {}
-    sites_df.columns = sites_df.columns.str.strip()
-    
-    for _, row in sites_df.iterrows():
-        site_id = row['Pair Identifier']
-        lat = row['Upper latitude']
-        lon = row['Upper longitude']
-        coords[site_id] = (lat, lon)
-    
-    return coords
+import xarray as xr    end_date = pd.Timestamp(end_year, 12, 31) if end_year else None
 
-def _resolve_year(year_param, index):
-    """Retourne l'année à utiliser pour l'index demandé."""
-    if isinstance(year_param, Sequence) and not isinstance(year_param, (str, bytes)):
-        if not year_param:
-            return None
-        return int(year_param[index]) if index < len(year_param) else int(year_param[-1])
-    if year_param is None:
-        return None
-    return int(year_param)
+from rasterio.transform import from_origin
+
+from rich.console import Console    df = aggregate_series(
+
+from rich.table import Table        paths,
+
+        csv_path,
+
+try:  # pragma: no cover - dépendance optionnelle        dataset="both",
+
+    import cdsapi        buffer_meters=buffer_meters,
+
+except ImportError:  # pragma: no cover        basins_geojson=basins_path,
+
+    cdsapi = None  # type: ignore[assignment]        start_date=start_date.date() if start_date is not None else None,
+
+        end_date=end_date.date() if end_date is not None else None,
+
+console = Console()        geometry_mode=geometry_mode,
+
+app = typer.Typer(help="Téléchargement et conversion ERA5 (ETP) pour le workflow PHES")    )
 
 
-def convert_era5_evapotranspiration_units(values, months=None, year=None):
-    """
-    Conversion scientifique ERA5 évapotranspiration
-    
-    Découverte critique: Les données ERA5 mensuelles sont des MOYENNES JOURNALIÈRES,
-    pas des cumuls mensuels ! Selon ECMWF: "effective units of m of water per day"
-    
-    Args:
-        values: Array numpy avec valeurs ERA5 brutes (12 mois)
-        months: Liste numéros mois (1-12) pour calcul jours/mois
-        year: Année ou séquence d'années correspondantes pour gérer les années bissextiles
-        
-    Returns:
-        Array numpy avec évapotranspiration en mm/mois (positive)
-    """
-    print(" CONVERSION UNITÉS ERA5 ÉVAPOTRANSPIRATION:")
-    print("   Découverte: Données mensuelles = moyennes journalières !")
-    
-    # Diagnostics valeurs brutes
-    print(f"   Valeurs brutes - Min: {values.min():.6f} m/jour")
-    print(f"   Valeurs brutes - Max: {values.max():.6f} m/jour")
-    print(f"   Valeurs brutes - Moyenne: {values.mean():.6f} m/jour")
-    
-    # Nombre de jours par mois (année non-bissextile par défaut)
-    if months is None:
-        months = list(range(1, 13))
-    
-    # Conversion scientifique correcte:
-    # 1. Prise en compte du signe ECMWF (flux sortant = négatif)
-    # 2. m/jour → mm/jour (×1000)
-    # 3. mm/jour → mm/mois (×jours_mois avec année bissextile le cas échéant)
-    et0_mm_monthly = []
-    
-    for i, month_val in enumerate(values):
-        month_num = months[i] if months and i < len(months) else (i % 12) + 1
-        current_year = _resolve_year(year, i)
-        if current_year is not None:
-            days = calendar.monthrange(current_year, month_num)[1]
-        else:
-            # Utilise un mois type non bissextile si année inconnue
-            days = DEFAULT_DAYS_IN_MONTH[(month_num - 1) % 12]
 
-        # Conversion: -(m/jour) × 1000 × jours_mois = mm/mois (sign convention ECMWF)
-        mm_monthly = max(0.0, -float(month_val)) * 1000 * days
-        et0_mm_monthly.append(mm_monthly)
-    
-    et0_mm = np.array(et0_mm_monthly)
-    
-    print(f"   Après conversion - Min: {et0_mm.min():.1f} mm/mois")
-    print(f"   Après conversion - Max: {et0_mm.max():.1f} mm/mois")
-    print(f"   Après conversion - Moyenne: {et0_mm.mean():.1f} mm/mois")
-    
-    # Validation cohérence Bénin
-    mean_monthly = et0_mm.mean()
-    annual_est = et0_mm.sum()
-    
-    print(f"\n VALIDATION CLIMATOLOGIQUE:")
-    print(f"   ET₀ mensuel moyen: {mean_monthly:.1f} mm/mois")
-    print(f"   ET₀ annuel total: {annual_est:.0f} mm/année")
-    
-    if 1200 <= annual_est <= 1800:
-        print(f"    Cohérent avec littérature Bénin (1200-1800 mm/année)")
-    elif annual_est < 600:
-        print(f"    Valeurs faibles - vérifier données source")
-    elif annual_est > 2500:
-        print(f"    Valeurs élevées - vérifier conversion") 
+    export_path = export_series(
+
+def _ensure_directory(path: Path) -> None:        _resolve_path(Path("results/site_stats_era5_standard.parquet"), output, paths.root),
+
+    path.mkdir(parents=True, exist_ok=True)        paths,
+
+        csv_path,
+
+        dataset="both",
+
+def _hours() -> list[str]:        buffer_meters=buffer_meters,
+
+    return [f"{hour:02d}:00" for hour in range(24)]        basins_geojson=basins_path,
+
+        geometry_mode=geometry_mode,
+
+        dataframe=df,
+
+def _months() -> list[str]:    )
+
+    return [f"{month:02d}" for month in range(1, 13)]
+
+    console.print(f"Séries sauvegardées dans {export_path}")
+
+    _print_summary(df)
+
+@dataclass
+
+class ConversionResult:
+
+    source: Pathdef _resolve_path(default: Path | None, candidate: Optional[Path], root: Path) -> Path:
+
+    output: Path    if candidate is None:
+
+    year: int        if default is None:
+
+    band_count: int            raise ValueError("Impossible de résoudre le chemin demandé")
+
+    precip_mm_mean: float        return default
+
+    etp_mm_mean: float    return candidate if candidate.is_absolute() else (root / candidate)
+
+
+
+
+
+@app.command("download")def _print_summary(df: pd.DataFrame) -> None:
+
+def download_era5(    if df.empty:
+
+    start_year: int = typer.Option(..., help="Première année incluse"),        console.print("[yellow]Aucune donnée générée : vérifier les rasters disponibles.[/yellow]")
+
+    end_year: int = typer.Option(..., help="Dernière année incluse"),        return
+
+    north: float = typer.Option(..., help="Latitude max (Nord)"),
+
+    west: float = typer.Option(..., help="Longitude Ouest"),    table = Table(title="Séries ERA5 + CHIRPS", header_style="bold cyan")
+
+    south: float = typer.Option(..., help="Latitude min (Sud)"),    table.add_column("Sites", justify="right")
+
+    east: float = typer.Option(..., help="Longitude Est"),    table.add_column("Période")
+
+    output_dir: Path = typer.Option(Path("data/era5/raw"), help="Répertoire des NetCDF téléchargés"),    table.add_column("Précip. moyenne (mm/mois)", justify="right")
+
+    variable: str = typer.Option("potential_evaporation", help="Variable ERA5 à récupérer"),    table.add_column("ETP moyenne (mm/mois)", justify="right")
+
+) -> None:
+
+    """Télécharge les champs ERA5 horaires via CDS (format NetCDF)."""    sites = df["pair_identifier"].nunique()
+
+    date_min = df["date"].min()
+
+    if cdsapi is None:    date_max = df["date"].max()
+
+        typer.echo("[!] Installez cdsapi (pip install cdsapi) et configurez ~/.cdsapirc avant de lancer le téléchargement.")    precip_mean = df["precip_mm"].mean()
+
+        raise typer.Exit(code=1)    etp_mean = df["etp_mm"].mean()
+
+
+
+    if end_year < start_year:    table.add_row(
+
+        raise typer.BadParameter("end-year doit être >= start-year")        str(sites),
+
+        f"{date_min:%Y-%m} → {date_max:%Y-%m}",
+
+    client = cdsapi.Client()  # type: ignore[call-arg]        f"{precip_mean:.1f}" if pd.notna(precip_mean) else "-",
+
+    _ensure_directory(output_dir)        f"{etp_mean:.1f}" if pd.notna(etp_mean) else "-",
+
+    )
+
+    for year in range(start_year, end_year + 1):    console.print(table)
+
+        target = output_dir / f"era5_{year}.nc"
+
+        if target.exists():
+
+            console.print(f"[green]Déjà présent : {target}")if __name__ == "__main__":
+
+            continue    app()
+        console.print(f"[cyan]Téléchargement ERA5 {year} → {target}")
+        client.retrieve(  # pragma: no cover - appel réseau
+            "reanalysis-era5-single-levels",
+            {
+                "product_type": "reanalysis",
+                "variable": variable,
+                "year": str(year),
+                "month": _months(),
+                "day": [f"{day:02d}" for day in range(1, 32)],
+                "time": _hours(),
+                "area": [north, west, south, east],
+                "format": "netcdf",
+            },
+            str(target),
+        )
+
+
+@app.command("convert")
+def convert_netcdf(
+    source: Path = typer.Option(..., help="Fichier NetCDF ERA5 ou dossier contenant des .nc"),
+    output: Optional[Path] = typer.Option(None, help="Chemin du GeoTIFF cible (si source unique)"),
+    output_dir: Path = typer.Option(Path("data/era5"), help="Dossier des GeoTIFF générés (si conversion par lot)"),
+    variable: str = typer.Option("potential_evaporation", help="Nom de la variable dans le NetCDF"),
+    aggregation: str = typer.Option("sum", help="Agrégation mensuelle: sum ou mean"),
+    multiplier: float = typer.Option(-1000.0, help="Facteur multiplicatif appliqué après agrégation"),
+    offset: float = typer.Option(0.0, help="Décalage ajouté après multiplication"),
+) -> None:
+    """Convertit un ou plusieurs NetCDF ERA5 en GeoTIFF multi-bandes."""
+
+    sources: Iterable[Path]
+    if source.is_dir():
+        sources = sorted(p for p in source.iterdir() if p.suffix.lower() in {".nc", ".nc4"})
+        if not sources:
+            raise typer.BadParameter(f"Aucun fichier NetCDF trouvé dans {source}")
+        _ensure_directory(output_dir)
     else:
-        print(f"    Hors plage attendue mais acceptable")
-    
-    return et0_mm
+        sources = [source]
+        if output is None:
+            _ensure_directory(output_dir)
 
-def extract_precip_from_chirps_tif(tif_file, sites_coords):
-    """
-    Extrait précipitations depuis fichier TIF CHIRPS pour tous les sites PHES
-    
-    Args:
-        tif_file: Path vers fichier TIF CHIRPS
-        sites_coords: Dict coordonnées sites
-        
-    Returns:
-        Dict avec précipitations par site {site_id: precip_mm}
-    """
-    print(f"    CHIRPS: {tif_file.name}")
-    
-    precip_data = {}
-    
-    with rasterio.open(tif_file) as src:
-        # Lire les données de précipitations (une seule bande)
-        precip_array = src.read(1)  # mm/mois
-        
-        for site_id, (lat, lon) in sites_coords.items():
-            try:
-                # Conversion coordonnées géographiques → pixels
-                row, col = src.index(lon, lat)
-                
-                if 0 <= row < src.height and 0 <= col < src.width:
-                    # Extraire valeur précipitation pour ce point
-                    precip_value = float(precip_array[row, col])
-                    
-                    # Vérifier si la valeur est valide (pas de nodata)
-                    if not np.isnan(precip_value) and precip_value >= 0:
-                        precip_data[site_id] = precip_value
-                    else:
-                        precip_data[site_id] = 0.0  # Aucune précipitation
-                        
-                else:
-                    print(f"    Site {site_id} hors grille CHIRPS")
-                    precip_data[site_id] = 0.0
-                    
-            except Exception as e:
-                print(f"    Erreur site {site_id}: {e}")
-                precip_data[site_id] = 0.0
-    
-    return precip_data
+    summaries: list[ConversionResult] = []
+    for netcdf_path in sources:
+        result = _convert_single(
+            netcdf_path,
+            variable=variable,
+            aggregation=aggregation,
+            multiplier=multiplier,
+            offset=offset,
+            explicit_output=output if source.is_file() and output else None,
+            default_output_dir=output_dir,
+        )
+        summaries.append(result)
+        console.print(
+            f"[green]✔ GeoTIFF {result.output.name} – {result.band_count} bandes, année {result.year}"
+        )
 
-def extract_et0_from_era5_tif(tif_file, sites_coords):
-    """
-    Extrait ET₀ depuis fichier TIF ERA5 pour tous les sites PHES
-    
-    Args:
-        tif_file: Path vers fichier TIF ERA5
-        sites_coords: Dict coordonnées sites
-        
-    Returns:
-        DataFrame avec données ET₀ mensuelles par site
-    """
-    print(f"\n TRAITEMENT: {tif_file.name}")
-    
-    year = int(tif_file.stem.split('_')[-1])
-    site_data = []
-    
-    with rasterio.open(tif_file) as src:
-        print(f"    Résolution: {src.res}° ({src.width}×{src.height} pixels)")
-        print(f"    Bandes: {src.count} (12 mois attendus)")
-        
-        # Lire toutes les bandes (12 mois)
-        all_bands = src.read()  # Shape: (12, height, width)
-        
-        for site_id, (lat, lon) in sites_coords.items():
-            try:
-                # Conversion coordonnées géographiques → pixels
-                # ERA5 global : -180 to +180 lon, -90 to +90 lat
-                # Méthode directe avec transform
-                row, col = src.index(lon, lat)
-                
-                if 0 <= row < src.height and 0 <= col < src.width:
-                    # Extraire série temporelle 12 mois pour ce point
-                    site_values = all_bands[:, row, col]
-                    
-                    # Conversion unités scientifique
-                    site_et0_mm = convert_era5_evapotranspiration_units(site_values, year=year)
-                    
-                    # Créer entrées mensuelles
-                    for month in range(12):
-                        et0_monthly = float(site_et0_mm[month])
-                        
-                        site_data.append({
-                            'id': site_id,
-                            'year': year,
-                            'month': month + 1,
-                            'E_mean': et0_monthly,  # ET₀ en mm/mois
-                            'P_mean': np.nan,  # Sera rempli avec CHIRPS
-                            'balance': np.nan,  # Sera calculé P_mean - E_mean
-                            'data_source': 'ERA5_Standard_ET0'
-                        })
-                
-                else:
-                    print(f"    Site {site_id} hors grille ({lat:.3f}°N, {lon:.3f}°E)")
-                    
-            except Exception as e:
-                print(f"    Erreur site {site_id}: {e}")
-                continue
-    
-    print(f"    {len(site_data)} enregistrements créés")
-    return pd.DataFrame(site_data)
+    _print_summary_table(summaries)
 
-def integrate_chirps_precipitation_data(df, sites_coords):
-    """
-    Intègre les données de précipitations CHIRPS dans le DataFrame ERA5
-    
-    Args:
-        df: DataFrame avec données ET₀ ERA5
-        sites_coords: Dict coordonnées sites
-        
-    Returns:
-        DataFrame avec P_mean et balance complétés
-    """
-    print(f"\n INTÉGRATION DONNÉES CHIRPS")
-    print("=" * 50)
-    
-    chirps_dir = DATA_DIR / "chirps"
-    
-    if not chirps_dir.exists():
-        print(f" Dossier CHIRPS non trouvé: {chirps_dir}")
-        return df
-    
-    # Recherche fichiers CHIRPS TIF
-    chirps_files = list(chirps_dir.glob("chirps-v2.0.*.tif"))
-    chirps_files.sort()
-    
-    if not chirps_files:
-        print(f" Aucun fichier CHIRPS trouvé dans {chirps_dir}")
-        return df
-    
-    print(f" {len(chirps_files)} fichiers CHIRPS trouvés")
-    
-    # Traiter chaque fichier CHIRPS et intégrer dans DataFrame
-    for chirps_file in chirps_files:
-        try:
-            # Extraire année et mois du nom fichier: chirps-v2.0.YYYY.MM.tif
-            filename_parts = chirps_file.stem.split('.')
-            if len(filename_parts) >= 3:
-                year = int(filename_parts[2])
-                month = int(filename_parts[3])
-                
-                # Extraire précipitations pour tous les sites
-                precip_data = extract_precip_from_chirps_tif(chirps_file, sites_coords)
-                
-                # Mettre à jour DataFrame pour cette année/mois
-                for site_id, precip_value in precip_data.items():
-                    # Trouver les lignes correspondantes
-                    mask = (df['id'] == site_id) & (df['year'] == year) & (df['month'] == month)
-                    
-                    if mask.any():
-                        # Mettre à jour P_mean
-                        df.loc[mask, 'P_mean'] = precip_value
-                        
-                        # Calculer balance = P_mean - E_mean
-                        e_mean = df.loc[mask, 'E_mean'].iloc[0]
-                        balance = precip_value - e_mean
-                        df.loc[mask, 'balance'] = balance
-                        
-                        # Mettre à jour source données
-                        df.loc[mask, 'data_source'] = 'ERA5_Standard_ET0+CHIRPS'
-                        
-        except Exception as e:
-            print(f"    Erreur traitement {chirps_file.name}: {e}")
-            continue
-    
-    # Statistiques intégration
-    total_records = len(df)
-    records_with_precip = len(df[df['P_mean'].notna()])
-    integration_rate = (records_with_precip / total_records) * 100 if total_records > 0 else 0
-    
-    print(f"\n RÉSULTATS INTÉGRATION CHIRPS:")
-    print(f"   Total enregistrements: {total_records}")
-    print(f"   Avec précipitations: {records_with_precip}")
-    print(f"   Taux intégration: {integration_rate:.1f}%")
-    
-    if records_with_precip > 0:
-        precip_stats = df['P_mean'].describe()
-        balance_stats = df['balance'].describe()
-        
-        print(f"\n STATISTIQUES PRÉCIPITATIONS:")
-        print(f"   Min: {precip_stats['min']:.1f} mm/mois")
-        print(f"   Moyenne: {precip_stats['mean']:.1f} mm/mois") 
-        print(f"   Max: {precip_stats['max']:.1f} mm/mois")
-        
-        print(f"\n STATISTIQUES BILAN P-E:")
-        print(f"   Min: {balance_stats['min']:.1f} mm/mois")
-        print(f"   Moyenne: {balance_stats['mean']:.1f} mm/mois")
-        print(f"   Max: {balance_stats['max']:.1f} mm/mois")
-        
-        # Validation climatologique
-        positive_balance_months = len(df[df['balance'] > 0])
-        total_months = len(df[df['balance'].notna()])
-        positive_rate = (positive_balance_months / total_months) * 100 if total_months > 0 else 0
-        
-        print(f"\n VALIDATION CLIMATOLOGIQUE:")
-        print(f"   Mois bilan positif: {positive_balance_months}/{total_months} ({positive_rate:.1f}%)")
-        
-        if 20 <= positive_rate <= 60:
-            print(f"    Cohérent avec climat tropical Bénin")
-        else:
-            print(f"    Taux inhabituel pour climat Bénin")
-    
-    return df
 
-def process_all_era5_standard_files():
-    """
-    Traite tous les fichiers ERA5 TIF standard
-    """
-    print(" TRAITEMENT ERA5 STANDARD - ÉVAPOTRANSPIRATION")
-    print("=" * 60)
-    print(" Source: Produit officiel ECMWF")
-    print(" Méthode: Conversion scientifique selon documentation")
-    print("=" * 60)
-    
-    # Chemins
-    era5_dir = DATA_DIR / "era5"
-    output_file = OUTPUT_DIR / "site_stats_era5_standard.csv"
-    
-    # Chargement sites
-    sites_coords = load_phes_sites_coordinates()
-    print(f" {len(sites_coords)} sites PHES chargés")
-    
-    # Recherche fichiers TIF
-    tif_files = list(era5_dir.glob("era5_*.tif"))
-    tif_files = sorted([f for f in tif_files if f.name.count('_') == 1])  # era5_YYYY.tif
-    
-    if not tif_files:
-        print(f" Aucun fichier TIF ERA5 trouvé dans {era5_dir}")
-        return False
-    
-    print(f" {len(tif_files)} fichiers ERA5 TIF trouvés")
-    
-    # Traitement fichier par fichier
-    all_data = []
-    
-    for tif_file in tif_files:
-        file_data = extract_et0_from_era5_tif(tif_file, sites_coords)
-        
-        if len(file_data) > 0:
-            all_data.append(file_data)
-    
-    if not all_data:
-        print(" Aucune donnée ET₀ extraite")
-        return False
-    
-    # Concaténation données ERA5
-    final_df = pd.concat(all_data, ignore_index=True)
-    final_df = final_df.sort_values(['id', 'year', 'month']).reset_index(drop=True)
-    
-    print(f"\n Données ERA5 ET₀ compilées: {len(final_df)} enregistrements")
-    
-    # INTÉGRATION DONNÉES CHIRPS
-    final_df = integrate_chirps_precipitation_data(final_df, sites_coords)
-    
-    # Statistiques finales intégrées
-    print(f"\n DONNÉES INTÉGRÉES ERA5+CHIRPS GÉNÉRÉES:")
-    print(f"   Total enregistrements: {len(final_df)}")
-    print(f"   Sites: {final_df['id'].nunique()}")
-    print(f"   Années: {final_df['year'].nunique()}")
-    print(f"   Plage: {final_df['year'].min()}-{final_df['year'].max()}")
-    
-    # Validation finale ET₀
-    et0_stats = final_df['E_mean'].describe()
-    print(f"\n STATISTIQUES ET₀ FINALES:")
-    print(f"   Min: {et0_stats['min']:.1f} mm/mois")
-    print(f"   Moyenne: {et0_stats['mean']:.1f} mm/mois")
-    print(f"   Max: {et0_stats['max']:.1f} mm/mois")
-    print(f"   Médiane: {et0_stats['50%']:.1f} mm/mois")
-    
-    annual_et0_mean = et0_stats['mean'] * 12
-    print(f"   Annual moyen: {annual_et0_mean:.0f} mm/année")
-    
-    # Validation finale Précipitations (si disponibles)
-    if 'P_mean' in final_df.columns and final_df['P_mean'].notna().any():
-        precip_stats = final_df['P_mean'].describe()
-        print(f"\n STATISTIQUES PRÉCIPITATIONS FINALES:")
-        print(f"   Min: {precip_stats['min']:.1f} mm/mois")
-        print(f"   Moyenne: {precip_stats['mean']:.1f} mm/mois")
-        print(f"   Max: {precip_stats['max']:.1f} mm/mois")
-        print(f"   Médiane: {precip_stats['50%']:.1f} mm/mois")
-        
-        annual_precip_mean = precip_stats['mean'] * 12
-        print(f"   Annual moyen: {annual_precip_mean:.0f} mm/année")
-    
-    # Validation finale Bilan P-E (si disponible)
-    if 'balance' in final_df.columns and final_df['balance'].notna().any():
-        balance_stats = final_df['balance'].describe()
-        print(f"\n STATISTIQUES BILAN P-E FINALES:")
-        print(f"   Min: {balance_stats['min']:.1f} mm/mois")
-        print(f"   Moyenne: {balance_stats['mean']:.1f} mm/mois")
-        print(f"   Max: {balance_stats['max']:.1f} mm/mois")
-        print(f"   Médiane: {balance_stats['50%']:.1f} mm/mois")
-        
-        annual_balance_mean = balance_stats['mean'] * 12
-        print(f"   Annual moyen: {annual_balance_mean:.0f} mm/année")
-        
-        # Validation climatologique bilan
-        if annual_balance_mean < -500:
-            print(f"    Déficit hydrique important (attendu climat semi-aride)")
-        elif -500 <= annual_balance_mean <= 0:
-            print(f"    Déficit modéré cohérent climat tropical")
-        else:
-            print(f"    Excès hydrique cohérent climat humide")
-    
-    # Sauvegarde
-    output_file.parent.mkdir(parents=True, exist_ok=True)
-    final_df.to_csv(output_file, index=False)
-    
-    print(f"\n DONNÉES SAUVEGARDÉES: {output_file}")
-    
-    return True
+def _convert_single(
+    netcdf_path: Path,
+    *,
+    variable: str,
+    aggregation: str,
+    multiplier: float,
+    offset: float,
+    explicit_output: Path | None,
+    default_output_dir: Path,
+) -> ConversionResult:
+    ds = xr.open_dataset(netcdf_path)
+    if variable not in ds:
+        raise typer.BadParameter(f"La variable '{variable}' est absente de {netcdf_path.name}")
+    data = ds[variable]
+    if "time" not in data.dims:
+        raise typer.BadParameter(f"La variable '{variable}' ne possède pas de dimension temporelle")
 
-def main():
-    """Fonction principale"""
-    
-    success = process_all_era5_standard_files()
-    
-    if success:
-        print(f"\n TRAITEMENT ERA5+CHIRPS INTÉGRÉ TERMINÉ!")
-        print("=" * 50)
-        print(" Évapotranspiration ERA5 scientifique appliquée")
-        print(" Précipitations CHIRPS intégrées")
-        print(" Bilan P-E complet et réaliste")
-        print(" Documentation ECMWF + CHIRPS respectée") 
-        print(" Fichier: site_stats_era5_standard.csv")
-        print(" Prêt pour analyses PHES avec données complètes")
+    data = data.sortby("time")
+    time_index = pd.to_datetime(data["time"].values)
+    unique_years = np.unique(time_index.year)
+    if unique_years.size != 1:
+        raise typer.BadParameter(
+            f"Le fichier {netcdf_path.name} couvre plusieurs années ({unique_years}). "
+            "Générez un fichier par année avant conversion."
+        )
+    year = int(unique_years[0])
+
+    if aggregation == "sum":
+        monthly = data.resample(time="MS").sum()
+    elif aggregation == "mean":
+        monthly = data.resample(time="MS").mean()
     else:
-        print(f"\n Échec traitement ERA5 standard")
+        raise typer.BadParameter("aggregation doit valoir 'sum' ou 'mean'")
+
+    monthly = (monthly * multiplier) + offset
+    monthly = monthly.transpose("time", "latitude", "longitude")
+
+    latitudes = monthly["latitude"].values
+    longitudes = monthly["longitude"].values
+
+    # Assurer un ordre décroissant en latitude pour correspondre à la convention GeoTIFF
+    if latitudes[0] < latitudes[-1]:
+        monthly = monthly.reindex(latitude=latitudes[::-1])
+        latitudes = monthly["latitude"].values
+
+    if latitudes.size < 2 or longitudes.size < 2:
+        raise typer.BadParameter("Le NetCDF doit contenir au moins deux pas de latitude et de longitude.")
+    y_res = float(abs(latitudes[1] - latitudes[0]))
+    x_res = float(abs(longitudes[1] - longitudes[0]))
+    transform = from_origin(float(longitudes.min()), float(latitudes.max()), x_res, y_res)
+
+    values = monthly.values.astype(np.float32)
+    band_count = values.shape[0]
+    if band_count != 12:
+        console.print(
+            f"[yellow]⚠ {netcdf_path.name} ne contient pas 12 mois (bandes = {band_count})."
+        )
+
+    output_path = explicit_output or (default_output_dir / f"era5_{year}.tif")
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    with rasterio.open(
+        output_path,
+        "w",
+        driver="GTiff",
+        height=values.shape[1],
+        width=values.shape[2],
+        count=band_count,
+        dtype="float32",
+        crs="EPSG:4326",
+        transform=transform,
+        nodata=np.nan,
+        compress="lzw",
+    ) as dst:
+        timestamps = pd.to_datetime(monthly["time"].values)
+        for idx in range(band_count):
+            dst.write(values[idx], idx + 1)
+            month_label = f"{timestamps[idx].month:02d}"
+            dst.set_band_description(idx + 1, month_label)
+
+    precip_mean = float(np.nanmean(values))
+    return ConversionResult(
+        source=netcdf_path,
+        output=output_path,
+        year=year,
+        band_count=band_count,
+        precip_mm_mean=precip_mean,
+        etp_mm_mean=precip_mean,
+    )
+
+
+def _print_summary_table(results: list[ConversionResult]) -> None:
+    if not results:
+        return
+    table = Table(title="Conversion ERA5 → GeoTIFF", header_style="bold cyan")
+    table.add_column("Fichier NetCDF")
+    table.add_column("GeoTIFF")
+    table.add_column("Année", justify="right")
+    table.add_column("Bandes", justify="right")
+    table.add_column("Moyenne (mm/mois)", justify="right")
+    for entry in results:
+        table.add_row(
+            entry.source.name,
+            entry.output.name,
+            str(entry.year),
+            str(entry.band_count),
+            f"{entry.precip_mm_mean:.1f}" if np.isfinite(entry.precip_mm_mean) else "-",
+        )
+    console.print(table)
+
 
 if __name__ == "__main__":
-    main()
+    try:
+        app()
+    except typer.Exit:
+        raise
+    except Exception as exc:  # pragma: no cover - utilisation CLI
+        console.print(f"[red]Erreur : {exc}")
+        sys.exit(1)

@@ -19,6 +19,7 @@ Hypothèses principales :
 """
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import Dict, Iterable, List, Tuple
@@ -95,8 +96,14 @@ def load_site_parameters(
     for _, row in df.iterrows():
         upper_area = float(row.get("Upper reservoir area (ha)", 0) or 0)
         lower_area = float(row.get("Lower reservoir area (ha)", 0) or 0)
+        if math.isnan(upper_area):
+            upper_area = 0.0
+        if math.isnan(lower_area):
+            lower_area = 0.0
         total_area = max(upper_area + lower_area, 1.0)
-        capacity = float(row.get("Volume (GL)", row.get("Upper reservoir volume (GL)", 0)))
+        capacity = float(row.get("Volume (GL)", row.get("Upper reservoir volume (GL)", 0)) or 0)
+        if math.isnan(capacity) or capacity <= 0:
+            capacity = float(row.get("Lower reservoir volume (GL)", 0) or 0)
         pair_id = str(row["Pair Identifier"]).strip()
         basin_area_km2 = None
         if basin_areas_m2:
@@ -115,7 +122,19 @@ def load_site_parameters(
 
 
 def load_climate_series(climate_path: Path) -> pd.DataFrame:
-    df = pd.read_csv(climate_path)
+    suffix = climate_path.suffix.lower()
+    if suffix == ".parquet":
+        df = pd.read_parquet(climate_path)
+    else:
+        df = pd.read_csv(climate_path)
+    required_columns = {"pair_identifier", "date", "precip_mm", "etp_mm"}
+    missing = required_columns - set(df.columns)
+    if missing:
+        raise ValueError(
+            "Le fichier climatique doit contenir les colonnes suivantes : "
+            + ", ".join(sorted(required_columns))
+            + f". Colonnes manquantes : {', '.join(sorted(missing))}."
+        )
     df["date"] = pd.to_datetime(df["date"])  # type: ignore[assignment]
     df.sort_values(["pair_identifier", "date"], inplace=True)
     return df
@@ -143,16 +162,26 @@ def _annual_groups(dates: np.ndarray) -> Dict[int, np.ndarray]:
     return groups
 
 
-def _season_mask(dates: np.ndarray, months: Iterable[int]) -> np.ndarray:
-    months_arr = pd.to_datetime(dates).month
-    mask = np.isin(months_arr, list(months))
-    return np.where(mask)[0]
+def _dry_season_groups(dates: np.ndarray) -> Dict[int, np.ndarray]:
+    dt_index = pd.to_datetime(dates)
+    months = dt_index.month
+    years = dt_index.year
+    mask = np.isin(months, list(DRY_MONTHS))
+    dry_indices = np.where(mask)[0]
+    groups: Dict[int, List[int]] = {}
+    for idx in dry_indices:
+        month = months[idx]
+        year = years[idx]
+        season_year = year if month >= 11 else year - 1
+        groups.setdefault(season_year, []).append(int(idx))
+    return {year: np.array(sorted(indices)) for year, indices in groups.items() if indices}
 
 
 def simulate_site(
     site: SiteHydrologyParams,
     climate_df: pd.DataFrame,
     config: HydrologyModelConfig,
+    rng: np.random.Generator | None = None,
 ) -> HydrologySimulationResult:
     df_site = climate_df[climate_df["pair_identifier"] == site.pair_identifier]
     if df_site.empty:
@@ -162,13 +191,14 @@ def simulate_site(
     etp_m = np.abs(_to_meters(df_site["etp_mm"]))
     dates = df_site["date"].to_numpy()
 
-    area_m2 = site.catchment_area_m2
-    precip_gl = (precip_m * area_m2) / GL_IN_M3
-    etp_gl = (etp_m * area_m2) / GL_IN_M3
+    basin_area_m2 = site.catchment_area_m2
+    reservoir_area_m2 = site.reservoir_area_m2
+    precip_gl = (precip_m * basin_area_m2) / GL_IN_M3
+    etp_gl = (etp_m * reservoir_area_m2) / GL_IN_M3
 
     n_months = len(df_site)
     n_sim = config.iterations
-    rng = np.random.default_rng(config.seed)
+    rng = rng or np.random.default_rng(config.seed)
 
     runoff = _scale_beta(
         rng,
@@ -189,37 +219,61 @@ def simulate_site(
     available_fraction = np.clip(1.0 - runoff, 0.0, 1.0)
     infiltration = np.minimum(infiltration_potential, available_fraction)
     evap_multiplier = np.clip(rng.normal(config.evap_mean, config.evap_std, size=(n_sim, n_months)), config.evap_bounds[0], config.evap_bounds[1])
-    leakage = rng.uniform(config.leakage_fraction[0], config.leakage_fraction[1], size=(n_sim, n_months)) * site.capacity_gl
+    leakage_fraction = rng.uniform(config.leakage_fraction[0], config.leakage_fraction[1], size=(n_sim, n_months))
 
     runoff_gl = runoff * precip_gl
     infiltration_gl = infiltration * precip_gl
     evap_gl = evap_multiplier * etp_gl
-    net_gl = runoff_gl - infiltration_gl - evap_gl - leakage
 
-    storage = np.full(n_sim, site.capacity_gl * config.initial_storage_fraction)
+    initial_storage = site.capacity_gl * config.initial_storage_fraction
+    storage = np.full(n_sim, initial_storage)
     never_empty = np.ones(n_sim, dtype=bool)
+    monthly_balance = np.zeros((n_sim, n_months))
+    storage_history = np.zeros((n_sim, n_months))
 
     for idx in range(n_months):
-        storage = storage + net_gl[:, idx]
+        net = runoff_gl[:, idx] - infiltration_gl[:, idx] - evap_gl[:, idx]
+        leakage_gl = leakage_fraction[:, idx] * storage
+        net = net - leakage_gl
+        monthly_balance[:, idx] = net
+        storage = storage + net
         storage = np.clip(storage, 0.0, site.capacity_gl)
+        storage_history[:, idx] = storage
         never_empty &= storage > 0
 
     annual_indices = _annual_groups(dates)
     annual_balances = []
     for idx in annual_indices.values():
-        annual_balances.append(net_gl[:, idx].sum(axis=1))
+        annual_balances.append(monthly_balance[:, idx].sum(axis=1))
     annual_balances_arr = np.stack(annual_balances, axis=1)
     annual_flat = annual_balances_arr.flatten()
 
-    dry_idx = _season_mask(dates, DRY_MONTHS)
-    if dry_idx.size:
-        dry_balances = net_gl[:, dry_idx].sum(axis=1)
-        dry_prob_positive = float((dry_balances > 0).mean())
-        dry_p10 = float(np.percentile(dry_balances, 10))
-        dry_median = float(np.median(dry_balances))
-        dry_deficits = np.clip(-dry_balances, 0.0, None)
-        dry_median_deficit = float(np.median(dry_deficits))
-        dry_p90_deficit = float(np.percentile(dry_deficits, 90))
+    dry_groups = _dry_season_groups(dates)
+    if dry_groups:
+        dry_balance_list: List[np.ndarray] = []
+        dry_net_with_storage: List[np.ndarray] = []
+        dry_deficits_list: List[np.ndarray] = []
+        for indices in dry_groups.values():
+            balances = monthly_balance[:, indices].sum(axis=1)
+            first_idx = int(indices[0])
+            if first_idx > 0:
+                entering_storage = storage_history[:, first_idx - 1]
+            else:
+                entering_storage = np.full(n_sim, initial_storage)
+            net = balances + entering_storage
+            dry_balance_list.append(balances)
+            dry_net_with_storage.append(net)
+            dry_deficits_list.append(np.clip(-net, 0.0, None))
+
+        combined_balances = np.concatenate(dry_balance_list, axis=0)
+        combined_net = np.concatenate(dry_net_with_storage, axis=0)
+        combined_deficits = np.concatenate(dry_deficits_list, axis=0)
+
+        dry_prob_positive = float((combined_net > 0).mean())
+        dry_p10 = float(np.percentile(combined_balances, 10))
+        dry_median = float(np.median(combined_balances))
+        dry_median_deficit = float(np.median(combined_deficits))
+        dry_p90_deficit = float(np.percentile(combined_deficits, 90))
     else:
         dry_prob_positive = float("nan")
         dry_p10 = float("nan")
@@ -250,8 +304,14 @@ def run_hydrology_simulation_from_data(
     config: HydrologyModelConfig,
 ) -> pd.DataFrame:
     results: List[dict] = []
-    for site in params.values():
-        result = simulate_site(site, climate_df, config)
+    if config.seed is None:
+        seed_sequence = np.random.SeedSequence()
+    else:
+        seed_sequence = np.random.SeedSequence(config.seed)
+    child_sequences = seed_sequence.spawn(len(params))
+    for (site, child_seq) in zip(params.values(), child_sequences, strict=True):
+        rng = np.random.default_rng(child_seq)
+        result = simulate_site(site, climate_df, config, rng=rng)
         results.append(asdict(result))
     return pd.DataFrame(results)
 

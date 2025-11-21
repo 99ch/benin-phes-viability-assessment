@@ -96,12 +96,19 @@ def _parse_year_from_name(name: str) -> int | None:
     return int(match.group(1))
 
 
+def _find_compressed_files(directory: Path) -> list[Path]:
+    if not directory.exists():
+        return []
+    return sorted(path for path in directory.glob("*.tif.gz*") if path.is_file())
+
+
 def check_chirps(
     paths: DataPaths,
     expected_start_year: int,
     expected_end_year: int,
 ) -> DatasetQAReport:
     rasters = list_rasters(paths.chirps_dir)
+    compressed = _find_compressed_files(paths.chirps_dir)
     if not rasters:
         return DatasetQAReport(
             dataset="CHIRPS",
@@ -110,7 +117,8 @@ def check_chirps(
             coverage_end=None,
             expected_start=date(expected_start_year, 1, 1),
             expected_end=date(expected_end_year, 12, 1),
-            notes=["Aucun fichier .tif détecté"],
+            notes=["Aucun fichier .tif détecté"]
+            + ([f"{len(compressed)} fichiers compressés (.tif.gz) présents"] if compressed else []),
         )
 
     parsed_dates: list[date] = []
@@ -130,6 +138,10 @@ def check_chirps(
     notes: list[str] = []
     if unparsed:
         notes.append(f"{len(unparsed)} fichiers ignorés (pattern inconnu)")
+    if compressed:
+        rel_dir = paths.chirps_dir.relative_to(paths.root) if paths.chirps_dir.is_relative_to(paths.root) else paths.chirps_dir
+        cmd = f"for f in {rel_dir}/*.tif.gz*; do gunzip -f \"$f\"; done"
+        notes.append(f"{len(compressed)} fichiers compressés détectés → décompresser via `{cmd}`")
 
     return DatasetQAReport(
         dataset="CHIRPS",
@@ -150,6 +162,7 @@ def check_era5(
     expected_end_year: int,
 ) -> DatasetQAReport:
     rasters = list_rasters(paths.era5_dir)
+    compressed = _find_compressed_files(paths.era5_dir)
     if not rasters:
         return DatasetQAReport(
             dataset="ERA5",
@@ -158,7 +171,8 @@ def check_era5(
             coverage_end=None,
             expected_start=date(expected_start_year, 1, 1),
             expected_end=date(expected_end_year, 12, 1),
-            notes=["Aucun fichier .tif détecté"],
+            notes=["Aucun fichier .tif détecté"]
+            + ([f"{len(compressed)} fichiers compressés (.tif.gz) présents"] if compressed else []),
         )
 
     years_present: list[int] = []
@@ -185,6 +199,12 @@ def check_era5(
     expected_years = list(range(expected_start_year, expected_end_year + 1))
     missing_years = [str(year) for year in expected_years if year not in years_present]
 
+    notes = band_notes
+    if compressed:
+        rel_dir = paths.era5_dir.relative_to(paths.root) if paths.era5_dir.is_relative_to(paths.root) else paths.era5_dir
+        cmd = f"for f in {rel_dir}/*.tif.gz*; do gunzip -f \"$f\"; done"
+        notes.append(f"{len(compressed)} fichiers compressés détectés → décompresser via `{cmd}`")
+
     return DatasetQAReport(
         dataset="ERA5",
         file_count=len(rasters),
@@ -194,7 +214,7 @@ def check_era5(
         expected_end=date(expected_end_year, 12, 1),
         missing_periods=missing_years,
         duplicate_periods=[],
-        notes=band_notes,
+        notes=notes,
     )
 
 

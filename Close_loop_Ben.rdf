@@ -1,0 +1,2247 @@
+<rdf:RDF
+ xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+ xmlns:z="http://www.zotero.org/namespaces/export#"
+ xmlns:dcterms="http://purl.org/dc/terms/"
+ xmlns:dc="http://purl.org/dc/elements/1.1/"
+ xmlns:bib="http://purl.org/net/biblio#"
+ xmlns:foaf="http://xmlns.com/foaf/0.1/"
+ xmlns:link="http://purl.org/rss/1.0/modules/link/"
+ xmlns:prism="http://prismstandard.org/namespaces/1.2/basic/">
+    <bib:Document rdf:about="https://re100.eng.anu.edu.au/2024/04/24/fastest-energy-change-article/">
+        <z:itemType>webpage</z:itemType>
+        <dcterms:isPartOf>
+           <z:Website><dc:title>ANU RE100 Group</dc:title></z:Website>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Blakers</foaf:surname>
+                        <foaf:givenName>Andrew</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_73"/>
+        <dc:title>The fastest energy change in history still underway</dc:title>
+        <dcterms:abstract>Professor Andrew Blakers and Professor Ricardo Rüther (UFSC) have published an article in PV Magazine, detailing: 80% of new generation in 2023 was wind and solar, with solar installations reaching more than 350 GW Cumulative global solar installed capacity passed 1.4 TW, and cumulative production reached 1.7 TW, which is more than tenfold larger than ten years ago, and it is doubling every 3 years. If this growth rate continues, there will be more solar installed in 2031 than all other electricity generation technologies put together.</dcterms:abstract>
+        <dc:date>2024-04-24T00:00:00+00:00</dc:date>
+        <z:language>en-AU</z:language>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://re100.eng.anu.edu.au/2024/04/24/fastest-energy-change-article/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 09:45:47</dcterms:dateSubmitted>
+    </bib:Document>
+    <z:Attachment rdf:about="#item_73">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>Snapshot</dc:title>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://re100.eng.anu.edu.au/2024/04/24/fastest-energy-change-article/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 09:45:59</dcterms:dateSubmitted>
+        <z:linkMode>1</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://www.sciencedirect.com/science/article/pii/S0360544221007106">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf rdf:resource="urn:issn:0360-5442"/>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>McIlwaine</foaf:surname>
+                        <foaf:givenName>Neil</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Foley</foaf:surname>
+                        <foaf:givenName>Aoife M.</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Morrow</foaf:surname>
+                        <foaf:givenName>D. John</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Al Kez</foaf:surname>
+                        <foaf:givenName>Dlzar</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Zhang</foaf:surname>
+                        <foaf:givenName>Chongyu</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Lu</foaf:surname>
+                        <foaf:givenName>Xi</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Best</foaf:surname>
+                        <foaf:givenName>Robert J.</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_75"/>
+        <link:link rdf:resource="#item_76"/>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>Energy storage</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+            <z:AutomaticTag>
+               <rdf:value>Ancillary services</rdf:value>
+            </z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>Grid services</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>Power quality</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>Renewables</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>Smart grid</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:title>A state-of-the-art techno-economic review of distributed and embedded energy storage for energy systems</dc:title>
+        <dcterms:abstract>Renewable energy is projected to play an important role in reducing greenhouse gas emissions and in realising the climate change goals. Large scale development of variable renewable energy, which is regarded as non-dispatchable, requires additional power system quality services such as voltage regulation, frequency regulation and inertial response. Energy storage provides an important means to supply these services but there are many uncertainties in terms of technology, market readiness, economics, and regulatory requirements. The aim of this study is to undertake a global state-of-the-art review of the techno-economic and regulatory status of energy storage and power quality services at the distribution level. The review will establish the global trends in electricity markets that have seen high levels of renewable energy penetration. The results of the investigation indicate that further research is required to qualify, quantify, and value the installation of mass energy storage particularly at the distribution level.</dcterms:abstract>
+        <dc:date>2021-08-15</dc:date>
+        <z:libraryCatalog>ScienceDirect</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://www.sciencedirect.com/science/article/pii/S0360544221007106</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 09:46:09</dcterms:dateSubmitted>
+        <bib:pages>120461</bib:pages>
+    </bib:Article>
+    <bib:Journal rdf:about="urn:issn:0360-5442">
+        <prism:volume>229</prism:volume>
+        <dc:title>Energy</dc:title>
+        <dc:identifier>DOI 10.1016/j.energy.2021.120461</dc:identifier>
+        <dcterms:alternative>Energy</dcterms:alternative>
+        <dc:identifier>ISSN 0360-5442</dc:identifier>
+    </bib:Journal>
+    <z:Attachment rdf:about="#item_75">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>ScienceDirect Snapshot</dc:title>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://www.sciencedirect.com/science/article/pii/S0360544221007106</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 09:46:29</dcterms:dateSubmitted>
+        <z:linkMode>1</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <z:Attachment rdf:about="#item_76">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>Texte intégral</dc:title>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://pureadmin.qub.ac.uk/ws/files/241026646/state1.pdf</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 09:46:39</dcterms:dateSubmitted>
+        <z:linkMode>1</z:linkMode>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="#item_77">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>229</prism:volume>
+                <dc:title>Energy</dc:title>
+                <dc:identifier>DOI 10.1016/j.energy.2021.120461</dc:identifier>
+                <dcterms:alternative>Energy</dcterms:alternative>
+                <dc:identifier>ISSN 0360-5442</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>McIlwaine</foaf:surname>
+                        <foaf:givenName>Neil</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Foley</foaf:surname>
+                        <foaf:givenName>Aoife M.</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Morrow</foaf:surname>
+                        <foaf:givenName>D. John</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Al Kez</foaf:surname>
+                        <foaf:givenName>Dlzar</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Zhang</foaf:surname>
+                        <foaf:givenName>Chongyu</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Lu</foaf:surname>
+                        <foaf:givenName>Xi</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Best</foaf:surname>
+                        <foaf:givenName>Robert J.</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_78"/>
+        <link:link rdf:resource="#item_79"/>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>Energy storage</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+            <z:AutomaticTag>
+               <rdf:value>Ancillary services</rdf:value>
+            </z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>Grid services</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>Power quality</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>Renewables</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>Smart grid</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:title>A state-of-the-art techno-economic review of distributed and embedded energy storage for energy systems</dc:title>
+        <dcterms:abstract>Renewable energy is projected to play an important role in reducing greenhouse gas emissions and in realising the climate change goals. Large scale development of variable renewable energy, which is regarded as non-dispatchable, requires additional power system quality services such as voltage regulation, frequency regulation and inertial response. Energy storage provides an important means to supply these services but there are many uncertainties in terms of technology, market readiness, economics, and regulatory requirements. The aim of this study is to undertake a global state-of-the-art review of the techno-economic and regulatory status of energy storage and power quality services at the distribution level. The review will establish the global trends in electricity markets that have seen high levels of renewable energy penetration. The results of the investigation indicate that further research is required to qualify, quantify, and value the installation of mass energy storage particularly at the distribution level.</dcterms:abstract>
+        <dc:date>2021-08-15</dc:date>
+        <z:libraryCatalog>ScienceDirect</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://www.sciencedirect.com/science/article/pii/S0360544221007106</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 10:02:20</dcterms:dateSubmitted>
+        <bib:pages>120461</bib:pages>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_78">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>ScienceDirect Snapshot</dc:title>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://www.sciencedirect.com/science/article/pii/S0360544221007106</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 10:02:36</dcterms:dateSubmitted>
+        <z:linkMode>1</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <z:Attachment rdf:about="#item_79">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>Texte intégral</dc:title>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://pureadmin.qub.ac.uk/ws/files/241026646/state1.pdf</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 10:02:48</dcterms:dateSubmitted>
+        <z:linkMode>1</z:linkMode>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://doi.org/10.1088/2516-1083/abeb5b">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf rdf:resource="urn:issn:2516-1083"/>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Blakers</foaf:surname>
+                        <foaf:givenName>Andrew</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Stocks</foaf:surname>
+                        <foaf:givenName>Matthew</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Lu</foaf:surname>
+                        <foaf:givenName>Bin</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Cheng</foaf:surname>
+                        <foaf:givenName>Cheng</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_81"/>
+        <dc:title>A review of pumped hydro energy storage</dc:title>
+        <dcterms:abstract>The need for storage in electricity systems is increasing because large amounts of variable solar and wind generation capacity are being deployed. About two thirds of net global annual power capacity additions are solar and wind. Pumped hydro energy storage (PHES) comprises about 96% of global storage power capacity and 99% of global storage energy volume. Batteries occupy most of the balance of the electricity storage market including utility, home and electric vehicle batteries. Batteries are rapidly falling in price and can compete with pumped hydro for short-term storage (minutes to hours). However, pumped hydro continues to be much cheaper for large-scale energy storage (several hours to weeks). Most existing pumped hydro storage is river-based in conjunction with hydroelectric generation. Water can be pumped from a lower to an upper reservoir during times of low demand and the stored energy can be recovered at a later time. In the future, the vast storage opportunities available in closed loop off-river pumped hydro systems will be utilized. In such systems water is cycled repeatedly between two closely spaced small reservoirs located away from a river. This review covers the technology, cost, environmental impacts and opportunities for PHES. The key motivations for this review are firstly that large amounts of variable wind and solar generators are being deployed; and secondly that there are vast opportunities for low-cost pumped hydro storage that do not require interference with rivers (with the associated environmental cost). Video Abstract: A review of pumped hydro energy storage</dcterms:abstract>
+        <dc:date>2021-03</dc:date>
+        <z:language>en</z:language>
+        <z:libraryCatalog>Institute of Physics</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+               <rdf:value>https://doi.org/10.1088/2516-1083/abeb5b</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 10:27:38</dcterms:dateSubmitted>
+        <dc:description>Publisher: IOP Publishing</dc:description>
+        <bib:pages>022003</bib:pages>
+    </bib:Article>
+    <bib:Journal rdf:about="urn:issn:2516-1083">
+        <prism:volume>3</prism:volume>
+        <dc:title>Progress in Energy</dc:title>
+        <dc:identifier>DOI 10.1088/2516-1083/abeb5b</dc:identifier>
+        <prism:number>2</prism:number>
+        <dcterms:alternative>Prog. Energy</dcterms:alternative>
+        <dc:identifier>ISSN 2516-1083</dc:identifier>
+    </bib:Journal>
+    <z:Attachment rdf:about="#item_81">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>IOP Full Text PDF</dc:title>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://iopscience.iop.org/article/10.1088/2516-1083/abeb5b/pdf</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 10:27:43</dcterms:dateSubmitted>
+        <z:linkMode>1</z:linkMode>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Document rdf:about="https://www.worldometers.info/world-population/benin-population/">
+        <z:itemType>webpage</z:itemType>
+        <dcterms:isPartOf>
+           <z:Website><dc:title>Worldometer</dc:title></z:Website>
+        </dcterms:isPartOf>
+        <link:link rdf:resource="#item_83"/>
+        <dc:title>Benin Population (2025)</dc:title>
+        <dcterms:abstract>Population of Benin: current, historical, and projected population, growth rate, immigration, median age, total fertility rate (TFR), population density, urbanization, urban population, country's share of world population, and global rank. Data tables, maps, charts, and live population clock</dcterms:abstract>
+        <z:language>en</z:language>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://www.worldometers.info/world-population/benin-population/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 10:32:43</dcterms:dateSubmitted>
+    </bib:Document>
+    <z:Attachment rdf:about="#item_83">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>Snapshot</dc:title>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://www.worldometers.info/world-population/benin-population/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 10:32:52</dcterms:dateSubmitted>
+        <z:linkMode>1</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://www.sciencedirect.com/science/article/pii/S0960148122017256">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf rdf:resource="urn:issn:0960-1481"/>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Mensah</foaf:surname>
+                        <foaf:givenName>Johnson Herlich Roslee</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>dos Santos</foaf:surname>
+                        <foaf:givenName>Ivan Felipe Silva</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Tiago Filho</foaf:surname>
+                        <foaf:givenName>Geraldo Lúcio</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_85"/>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>Benin Republic</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+            <z:AutomaticTag>
+               <rdf:value>Critical analysis</rdf:value>
+            </z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+            <z:AutomaticTag>
+               <rdf:value>Electricity access</rdf:value>
+            </z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+            <z:AutomaticTag>
+               <rdf:value>Power generation</rdf:value>
+            </z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>WAEMU bloc</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>West Africa</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:title>A critical analysis of the energy situation in the Benin Republic and its evolution over the last decade</dc:title>
+        <dcterms:abstract>Electricity demand in Benin has continuously increased due to rapid population growth, and demand is expected to increase further in coming years. The Benin government wants to increase its renewable energy production capacity by 2030 via its Action Program (PAG), to reduce energy deficits, and guarantee electricity access for its entire population by 2035. This article analyzed the energy status of the country with a focus on energy production, consumption, and imports, from 2010 to 2018, based on reports from national research agencies and international academic papers. We found that, although Benin has good potential for using renewable energy, potential generation would only supply a small portion of the country's energy needs resulting in increased imports from neighboring countries, which were already at about 1320 GWh in 2018. We observed that solar power electricity production increased considerably, from 495 MWh in 2014 to 5391 MWh in 2018. Meanwhile, only 4.8 million of inhabitants had access to electricity in 2017. Analyses of the West African Economic and Monetary Union (WAEMU), show that Benin is the largest consumer of oil products (26.6%), and an electricity importer (25.6%), despite being home to only 9% of the total WAEMU population (more than 123 million inhabitants) in 2018.</dcterms:abstract>
+        <dc:date>2023-01-01</dc:date>
+        <z:libraryCatalog>ScienceDirect</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://www.sciencedirect.com/science/article/pii/S0960148122017256</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 10:35:53</dcterms:dateSubmitted>
+        <bib:pages>634-650</bib:pages>
+    </bib:Article>
+    <bib:Journal rdf:about="urn:issn:0960-1481">
+        <prism:volume>202</prism:volume>
+        <dc:title>Renewable Energy</dc:title>
+        <dc:identifier>DOI 10.1016/j.renene.2022.11.085</dc:identifier>
+        <dcterms:alternative>Renewable Energy</dcterms:alternative>
+        <dc:identifier>ISSN 0960-1481</dc:identifier>
+    </bib:Journal>
+    <z:Attachment rdf:about="#item_85">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>ScienceDirect Snapshot</dc:title>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://www.sciencedirect.com/science/article/pii/S0960148122017256</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 10:36:01</dcterms:dateSubmitted>
+        <z:linkMode>1</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Document rdf:about="https://climateknowledgeportal.worldbank.org/">
+        <z:itemType>webpage</z:itemType>
+        <dcterms:isPartOf>
+           <z:Website></z:Website>
+        </dcterms:isPartOf>
+        <link:link rdf:resource="#item_87"/>
+        <dc:title>Climate Change Knowledge Portal | Climate Change Knowledge Portal</dc:title>
+        <z:language>en</z:language>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://climateknowledgeportal.worldbank.org/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 10:36:49</dcterms:dateSubmitted>
+    </bib:Document>
+    <z:Attachment rdf:about="#item_87">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>Snapshot</dc:title>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://climateknowledgeportal.worldbank.org/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 10:36:54</dcterms:dateSubmitted>
+        <z:linkMode>1</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Document rdf:about="https://www.gouv.bj/article/1858/inauguration-centrale-solaire-photovoltaique-25-illoulofin-benin-poursuit-marche-vers-autonomie-energetique/">
+        <z:itemType>webpage</z:itemType>
+        <dcterms:isPartOf>
+            <z:Website>
+               <dc:title>Gouvernement de la République du Bénin</dc:title>
+            </z:Website>
+        </dcterms:isPartOf>
+        <link:link rdf:resource="#item_89"/>
+        <dc:title>Inauguration de la Centrale solaire photovoltaïque 25 MWc d'Illoulofin : Le Bénin poursuit sa marche vers l'autonomie énergétique</dc:title>
+        <z:language>fr</z:language>
+        <z:shortTitle>Inauguration de la Centrale solaire photovoltaïque 25 MWc d'Illoulofin</z:shortTitle>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://www.gouv.bj/article/1858/inauguration-centrale-solaire-photovoltaique-25-illoulofin-benin-poursuit-marche-vers-autonomie-energetique/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 10:37:39</dcterms:dateSubmitted>
+    </bib:Document>
+    <z:Attachment rdf:about="#item_89">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>Snapshot</dc:title>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://www.gouv.bj/article/1858/inauguration-centrale-solaire-photovoltaique-25-illoulofin-benin-poursuit-marche-vers-autonomie-energetique/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 10:37:53</dcterms:dateSubmitted>
+        <z:linkMode>1</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Document rdf:about="https://www.gouv.bj/article/2860/lancement-travaux-centralesolaireforsun-pobe-engagementrenforce-gouvernement-autonomie-energetiquebenin/">
+        <z:itemType>webpage</z:itemType>
+        <dcterms:isPartOf>
+            <z:Website>
+               <dc:title>Gouvernement de la République du Bénin</dc:title>
+            </z:Website>
+        </dcterms:isPartOf>
+        <link:link rdf:resource="#item_91"/>
+        <dc:title>Lancement des travaux de la centrale Solaire PV FORSUN à Pobè : Un engagement renforcé du Gouvernement pour l’autonomie énergétique du Bénin</dc:title>
+        <z:language>fr</z:language>
+        <z:shortTitle>Lancement des travaux de la centrale Solaire PV FORSUN à Pobè</z:shortTitle>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://www.gouv.bj/article/2860/lancement-travaux-centralesolaireforsun-pobe-engagementrenforce-gouvernement-autonomie-energetiquebenin/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 10:38:12</dcterms:dateSubmitted>
+    </bib:Document>
+    <z:Attachment rdf:about="#item_91">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>Snapshot</dc:title>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://www.gouv.bj/article/2860/lancement-travaux-centralesolaireforsun-pobe-engagementrenforce-gouvernement-autonomie-energetiquebenin/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 10:38:23</dcterms:dateSubmitted>
+        <z:linkMode>1</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Document rdf:about="https://www.eeas.europa.eu/delegations/benin/c%C3%A9r%C3%A9monie-de-lancement-officiel-des-travaux-de-la-centrale-solaire-25-mwc-forsun-%C3%A0-pob%C3%A8_fr?s=84">
+        <z:itemType>webpage</z:itemType>
+        <dcterms:isPartOf>
+           <z:Website></z:Website>
+        </dcterms:isPartOf>
+        <link:link rdf:resource="#item_93"/>
+        <dc:title>Cérémonie de lancement officiel des travaux de la Centrale Solaire 25 MWc FORSUN à Pobè | EEAS</dc:title>
+        <dcterms:abstract>Dans le cadre des &quot;Semaines de la diplomatie verte 2024&quot;, la Délégation de l'Union européenne a pris part le 12 novembre 2024 au lancement officiel des travaux de la Centrale Solaire 25 MWc FORSUN à Pobè qui portera la capacité de production du site d’Illoulofin à 75MWc.</dcterms:abstract>
+        <z:language>fr</z:language>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://www.eeas.europa.eu/delegations/benin/c%C3%A9r%C3%A9monie-de-lancement-officiel-des-travaux-de-la-centrale-solaire-25-mwc-forsun-%C3%A0-pob%C3%A8_fr?s=84</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 10:38:53</dcterms:dateSubmitted>
+    </bib:Document>
+    <z:Attachment rdf:about="#item_93">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>Snapshot</dc:title>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://www.eeas.europa.eu/delegations/benin/c%C3%A9r%C3%A9monie-de-lancement-officiel-des-travaux-de-la-centrale-solaire-25-mwc-forsun-%C3%A0-pob%C3%A8_fr?s=84</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 10:39:09</dcterms:dateSubmitted>
+        <z:linkMode>1</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Document rdf:about="https://www.gouv.bj/article/2770/centrale-thermique-maria-gleta-cinq-deja-36.000-heures-marche.-infrastructure-fonctionne-merveille/">
+        <z:itemType>webpage</z:itemType>
+        <dcterms:isPartOf>
+            <z:Website>
+               <dc:title>Gouvernement de la République du Bénin</dc:title>
+            </z:Website>
+        </dcterms:isPartOf>
+        <link:link rdf:resource="#item_95"/>
+        <dc:title>Centrale Thermique de Maria-Gléta 2 : Cinq ans déjà ! 36.000 heures de marche. L'infrastructure fonctionne à merveille</dc:title>
+        <z:language>fr</z:language>
+        <z:shortTitle>Centrale Thermique de Maria-Gléta 2</z:shortTitle>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://www.gouv.bj/article/2770/centrale-thermique-maria-gleta-cinq-deja-36.000-heures-marche.-infrastructure-fonctionne-merveille/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 10:39:54</dcterms:dateSubmitted>
+    </bib:Document>
+    <z:Attachment rdf:about="#item_95">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>Snapshot</dc:title>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://www.gouv.bj/article/2770/centrale-thermique-maria-gleta-cinq-deja-36.000-heures-marche.-infrastructure-fonctionne-merveille/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 10:40:05</dcterms:dateSubmitted>
+        <z:linkMode>1</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Document rdf:about="https://ndcpartnership.org/country/ben">
+        <z:itemType>webpage</z:itemType>
+        <dcterms:isPartOf>
+           <z:Website></z:Website>
+        </dcterms:isPartOf>
+        <link:link rdf:resource="#item_97"/>
+        <dc:title>Benin | NDC Partnership</dc:title>
+        <dcterms:abstract>Benin submitted an updated NDC in 2021 which reflects an increase in ambition to reduce emissions by 20.15% over the period 2021-2030 as compared to the reference scenario. The updated NDC covers the agriculture, forestry, coastal and water resources, health, and tourism sector and includes adaptation measures focused on the protection of natural and human systems and the vulnerability reduction in NDC sectors. The total estimated costs of NDC implementation (conditional and unconditional combined) are estimated at USD 6 billion for mitigation measures and USD 5.5 billion for adaptation.</dcterms:abstract>
+        <z:language>en</z:language>
+        <dc:identifier>
+            <dcterms:URI>
+               <rdf:value>https://ndcpartnership.org/country/ben</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 10:40:47</dcterms:dateSubmitted>
+    </bib:Document>
+    <z:Attachment rdf:about="#item_97">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>Snapshot</dc:title>
+        <dc:identifier>
+            <dcterms:URI>
+               <rdf:value>https://ndcpartnership.org/country/ben</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 10:40:54</dcterms:dateSubmitted>
+        <z:linkMode>1</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <rdf:Description rdf:about="https://www.researchgate.net/publication/385803558_GIS_and_AHP_method_to_identify_favorable_sites_for_P2_PHES_installation_in_Benin">
+        <z:itemType>conferencePaper</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <dc:title>ResearchGate</dc:title>
+                <dc:identifier>DOI 10.1109/IConEEI64414.2024.10748006</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <link:link rdf:resource="#item_99"/>
+        <dc:title>GIS and AHP method to identify favorable sites for P2 PHES installation in Benin | Request PDF</dc:title>
+        <dcterms:abstract>Request PDF | On Oct 16, 2024, Ibrahim Lopez and others published GIS and AHP method to identify favorable sites for P2 PHES installation in Benin | Find, read and cite all the research you need on ResearchGate</dcterms:abstract>
+        <z:language>en</z:language>
+        <z:libraryCatalog>www.researchgate.net</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://www.researchgate.net/publication/385803558_GIS_and_AHP_method_to_identify_favorable_sites_for_P2_PHES_installation_in_Benin</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 10:46:32</dcterms:dateSubmitted>
+    </rdf:Description>
+    <z:Attachment rdf:about="#item_99">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>Snapshot</dc:title>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://www.researchgate.net/publication/385803558_GIS_and_AHP_method_to_identify_favorable_sites_for_P2_PHES_installation_in_Benin</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 10:46:37</dcterms:dateSubmitted>
+        <z:linkMode>1</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Document rdf:about="https://www.energy.gov/eere/water/articles/comparison-environmental-effects-open-loop-and-closed-loop-pumped-storage">
+        <z:itemType>webpage</z:itemType>
+        <dcterms:isPartOf>
+           <z:Website><dc:title>Energy.gov</dc:title></z:Website>
+        </dcterms:isPartOf>
+        <link:link rdf:resource="#item_101"/>
+        <dc:title>A Comparison of the Environmental Effects of Open-Loop and Closed-Loop Pumped Storage Hydropower</dc:title>
+        <dcterms:abstract>A Comparison of the Environmental Effects of Open-Loop and Closed-Loop Pumped Storage Hydropower.</dcterms:abstract>
+        <z:language>en</z:language>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://www.energy.gov/eere/water/articles/comparison-environmental-effects-open-loop-and-closed-loop-pumped-storage</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 10:50:47</dcterms:dateSubmitted>
+    </bib:Document>
+    <z:Attachment rdf:about="#item_101">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>Snapshot</dc:title>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://www.energy.gov/eere/water/articles/comparison-environmental-effects-open-loop-and-closed-loop-pumped-storage</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 10:50:56</dcterms:dateSubmitted>
+        <z:linkMode>1</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://www.mdpi.com/2073-4441/17/18/2752">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf rdf:resource="urn:issn:2073-4441"/>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Yin</foaf:surname>
+                        <foaf:givenName>Hailong</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Zhao</foaf:surname>
+                        <foaf:givenName>Xuhong</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Chen</foaf:surname>
+                        <foaf:givenName>Meixuan</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Fu</foaf:surname>
+                        <foaf:givenName>Zeding</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Fang</foaf:surname>
+                        <foaf:givenName>Yingchun</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Wang</foaf:surname>
+                        <foaf:givenName>Hui</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Li</foaf:surname>
+                        <foaf:givenName>Meifang</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Luo</foaf:surname>
+                        <foaf:givenName>Jiahao</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Tan</foaf:surname>
+                        <foaf:givenName>Peiyang</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Fu</foaf:surname>
+                        <foaf:givenName>Xiaohua</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_103"/>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>CiteSpace</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+            <z:AutomaticTag>
+               <rdf:value>ecological environment</rdf:value>
+            </z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+            <z:AutomaticTag>
+               <rdf:value>pumped hydro storage</rdf:value>
+            </z:AutomaticTag>
+        </dc:subject>
+        <dc:title>A Review on Ecological and Environmental Impacts of Pumped Hydro Storage Based on CiteSpace Analysis</dc:title>
+        <dcterms:abstract>This study conducted a systematic review of 222 research articles (2014–2024) from the Web of Science Core Collection database to investigate the ecological and environmental impacts of pumped hydro storage (PHS). Utilizing CiteSpace 6.1R software for visual analysis, the research hotspots and evolutionary trends over the past decade were comprehensively examined. Key findings include the following: (1) Annual publication output exhibited sustained growth, with China contributing 29.7% of total publications, ranking first globally. (2) Research institutions demonstrated broad geographical distribution but weak collaborative networks, as the top 10 institutions accounted for only 21.6% of total publications, highlighting untapped potential for cross-regional cooperation. (3) Current research focuses on three domains: ecological–environmental benefit assessment, renewable energy synergistic integration, and power grid regulation optimization. Emerging trends emphasize multi-objective planning (e.g., economic–ecological trade-offs) and hybrid system design (e.g., solar–wind–PHS coordinated dispatch), providing critical support for green energy transitions. (4) Post-2020 research has witnessed novel thematic directions, including deepened studies on wind–PHS coupling and life-cycle assessment (LCA). Policy-driven renewable energy integration research entered an explosive growth phase, with PHS–photovoltaic–wind complementary technologies emerging as a core innovation pathway. Future research should prioritize strengthening institutional collaboration networks, exploring region-specific ecological impact mechanisms, and advancing policy–technology–environment multi-dimensional frameworks for practical applications.</dcterms:abstract>
+        <dc:date>2025/1</dc:date>
+        <z:language>en</z:language>
+        <z:libraryCatalog>www.mdpi.com</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+               <rdf:value>https://www.mdpi.com/2073-4441/17/18/2752</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 10:51:49</dcterms:dateSubmitted>
+        <dc:rights>http://creativecommons.org/licenses/by/3.0/</dc:rights>
+        <dc:description>Publisher: Multidisciplinary Digital Publishing Institute</dc:description>
+        <bib:pages>2752</bib:pages>
+    </bib:Article>
+    <bib:Journal rdf:about="urn:issn:2073-4441">
+        <prism:volume>17</prism:volume>
+        <dc:title>Water</dc:title>
+        <dc:identifier>DOI 10.3390/w17182752</dc:identifier>
+        <prism:number>18</prism:number>
+        <dc:identifier>ISSN 2073-4441</dc:identifier>
+    </bib:Journal>
+    <z:Attachment rdf:about="#item_103">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>Full Text PDF</dc:title>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://www.mdpi.com/2073-4441/17/18/2752/pdf?version=1758112166</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 10:52:04</dcterms:dateSubmitted>
+        <z:linkMode>1</z:linkMode>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://doi.org/10.1021/acs.est.2c09189">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf rdf:resource="urn:issn:0013-936X"/>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Simon</foaf:surname>
+                        <foaf:givenName>Timothy R.</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Inman</foaf:surname>
+                        <foaf:givenName>Daniel</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Hanes</foaf:surname>
+                        <foaf:givenName>Rebecca</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Avery</foaf:surname>
+                        <foaf:givenName>Gregory</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Hettinger</foaf:surname>
+                        <foaf:givenName>Dylan</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Heath</foaf:surname>
+                        <foaf:givenName>Garvin</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_105"/>
+        <dc:title>Life Cycle Assessment of Closed-Loop Pumped Storage Hydropower in the United States</dc:title>
+        <dcterms:abstract>The United States has begun unprecedented efforts to decarbonize all sectors of the economy by 2050, requiring rapid deployment of variable renewable energy technologies and grid-scale energy storage. Pumped storage hydropower (PSH) is an established technology capable of providing grid-scale energy storage and grid resilience. There is limited information about the life cycle of greenhouse gas emissions associated with state-of-the-industry PSH technologies. The objective of this study is to perform a full life cycle assessment of new closed-loop PSH in the United States and assess the global warming potential (GWP) attributed to 1 kWh of stored electricity delivered to the nearest grid substation connection point. For this study, we use publicly available data from PSH facilities that are in the preliminary permitting phase. The modeling boundary is from facility construction to decommissioning. Our results estimate that the GWP of closed-loop PSH in the United States ranges from 58 to 530 g CO2e kWh–1, with the stored electricity grid mix having the largest impact, followed by concrete used in facility construction. Additionally, PSH site characteristics can have a substantive impact on GWP, with brownfield sites resulting in a 20% lower GWP compared to greenfield sites. Our results suggest that closed-loop PSH offers climate benefits over other energy storage technologies.</dcterms:abstract>
+        <dc:date>2023-08-22</dc:date>
+        <z:libraryCatalog>ACS Publications</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+               <rdf:value>https://doi.org/10.1021/acs.est.2c09189</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 10:55:32</dcterms:dateSubmitted>
+        <dc:description>Publisher: American Chemical Society</dc:description>
+        <bib:pages>12251-12258</bib:pages>
+    </bib:Article>
+    <bib:Journal rdf:about="urn:issn:0013-936X">
+        <prism:volume>57</prism:volume>
+        <dc:title>Environmental Science &amp; Technology</dc:title>
+        <dc:identifier>DOI 10.1021/acs.est.2c09189</dc:identifier>
+        <prism:number>33</prism:number>
+        <dcterms:alternative>Environ. Sci. Technol.</dcterms:alternative>
+        <dc:identifier>ISSN 0013-936X</dc:identifier>
+    </bib:Journal>
+    <z:Attachment rdf:about="#item_105">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>Full Text PDF</dc:title>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://pubs.acs.org/doi/pdf/10.1021/acs.est.2c09189</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 10:55:39</dcterms:dateSubmitted>
+        <z:linkMode>1</z:linkMode>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Report rdf:about="https://www.osti.gov/biblio/2500381">
+        <z:itemType>report</z:itemType>
+        <dc:publisher>
+            <foaf:Organization>
+                <foaf:name>Pacific Northwest National Laboratory (PNNL), Richland, WA (United States)</foaf:name>
+            </foaf:Organization>
+        </dc:publisher>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Pracheil</foaf:surname>
+                        <foaf:givenName>Brenda M.</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Duffy</foaf:surname>
+                        <foaf:givenName>Kevin P.</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Zeng</foaf:surname>
+                        <foaf:givenName>Lin</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Saulsbury</foaf:surname>
+                        <foaf:givenName>James W.</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <dc:title>Environmental Impacts of Closed-Loop Pumped Storage Hydropower</dc:title>
+        <dcterms:abstract>The goal of this report is to help license applicants, resource agencies, and other members of the hydropower community involved in closed-loop pumped storage hydropower permitting and licensing process, focus the scope of environmental reviews, and more quickly identify impacts with project nexus and potential mitigation measures for these impacts. Pumped storage hydropower (PSH) is an energy storage technology that uses energy to pump water up from a lower reservoir to an upper reservoir where water is stored until electricity is needed and the water is released to a lower reservoir passing through turbines. Closed-loop PSH—PSH that is not continuously connected to a naturally flowing water feature—is one of the lowest greenhouse gas emitting energy storage technologies and is therefore a critical part of the transition to renewable energy (Simon et al. 2023). Proposals for closed-loop PSH facilities in the United States currently account for more than 40% of original licenses and 99% of potential generation capacity in the Federal Energy Regulatory Commission (FERC) hydropower licensing pipeline (Johnson et al. 2023). While closed-loop PSH facilities can have lower environmental impacts than open-loop PSH facilities, no closed-loop facilities have been constructed in the United States to enable direct accounting of project impacts and efficacy of mitigations. Many proposals for closed-loop PSH submitted to FERC are abandoned early in the permitting and licensing process prior to license applications and environmental assessments, so there is little documentation describing potential project impacts and proposed mitigations. The newness of closed-loop PSH proposals in the United States may mean that tribal, federal, and state agencies with authorities for cultural and natural resources protection and management involved in the FERC licensing process may not have experience with closed-loop PSH regulation. Moreover, many proposed closed-loop PSH facilities are in areas that do not have high concentrations of conventional hydropower, so these agencies may also be unfamiliar with the FERC hydropower licensing process. The goal of this report is to help license applicants, resource agencies, and other members of the hydropower community focus the scope of environmental review for the closed-loop PSH development, licensing, and federal authorization process enabling quicker identification of potential impacts, mitigations, and situations where mitigation may not be possible. We found that environmental impacts of closed-loop PSH are highly site-specific, and generalizations about the types of environmental impacts across closed-loop PSH projects are difficult to make. Environmental impacts of closed-loop PSH are like those for open-loop PSH with a few exceptions including water sourcing, which can lead to delays and contention due to potential complexities with water rights, impacts to aquatic resources, and greenhouse gas emission potential. Cultural resource impacts were commonly reported in National Environmental Policy Act (NEPA) documents reviewed and discussed in interviews, but in many cases such impacts cannot be mitigated.</dcterms:abstract>
+        <dc:date>2025/01/14</dc:date>
+        <z:language>English</z:language>
+        <z:libraryCatalog>www.osti.gov</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+               <rdf:value>https://www.osti.gov/biblio/2500381</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 10:56:24</dcterms:dateSubmitted>
+        <dc:description>DOI: 10.2172/2500381</dc:description>
+        <prism:number>PNNL--36322</prism:number>
+    </bib:Report>
+    <bib:Article rdf:about="https://www.cell.com/joule/abstract/S2542-4351(20)30559-6">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf rdf:resource="urn:issn:2542-4785,%202542-4351"/>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Stocks</foaf:surname>
+                        <foaf:givenName>Matthew</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Stocks</foaf:surname>
+                        <foaf:givenName>Ryan</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Lu</foaf:surname>
+                        <foaf:givenName>Bin</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Cheng</foaf:surname>
+                        <foaf:givenName>Cheng</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Blakers</foaf:surname>
+                        <foaf:givenName>Andrew</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_108"/>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>wind</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>atlas</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>electricity</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>energy storage</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>GIS</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>photovoltaics</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>pumped hydro</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>renewable</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>resource</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>water</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:title>Global Atlas of Closed-Loop Pumped Hydro Energy Storage</dc:title>
+        <dc:date>2021-01-20</dc:date>
+        <z:language>English</z:language>
+        <z:libraryCatalog>www.cell.com</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://www.cell.com/joule/abstract/S2542-4351(20)30559-6</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 10:58:52</dcterms:dateSubmitted>
+        <dc:description>Publisher: Elsevier</dc:description>
+        <bib:pages>270-284</bib:pages>
+    </bib:Article>
+    <bib:Journal rdf:about="urn:issn:2542-4785,%202542-4351">
+        <prism:volume>5</prism:volume>
+        <dc:title>Joule</dc:title>
+        <dc:identifier>DOI 10.1016/j.joule.2020.11.015</dc:identifier>
+        <prism:number>1</prism:number>
+        <dcterms:alternative>Joule</dcterms:alternative>
+        <dc:identifier>ISSN 2542-4785, 2542-4351</dc:identifier>
+    </bib:Journal>
+    <z:Attachment rdf:about="#item_108">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>Full Text PDF</dc:title>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://www.cell.com/joule/pdf/S2542-4351(20)30559-6.pdf</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 10:58:53</dcterms:dateSubmitted>
+        <z:linkMode>1</z:linkMode>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://doi.org/10.1088/1748-9326/ac4d4f">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf rdf:resource="urn:issn:1748-9326"/>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Hawker</foaf:surname>
+                        <foaf:givenName>Laurence</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Uhe</foaf:surname>
+                        <foaf:givenName>Peter</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Paulo</foaf:surname>
+                        <foaf:givenName>Luntadila</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Sosa</foaf:surname>
+                        <foaf:givenName>Jeison</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Savage</foaf:surname>
+                        <foaf:givenName>James</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Sampson</foaf:surname>
+                        <foaf:givenName>Christopher</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Neal</foaf:surname>
+                        <foaf:givenName>Jeffrey</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_110"/>
+        <dc:title>A 30 m global map of elevation with forests and buildings removed</dc:title>
+        <dcterms:abstract>Elevation data are fundamental to many applications, especially in geosciences. The latest global elevation data contains forest and building artifacts that limit its usefulness for applications that require precise terrain heights, in particular flood simulation. Here, we use machine learning to remove buildings and forests from the Copernicus Digital Elevation Model to produce, for the first time, a global map of elevation with buildings and forests removed at 1 arc second (∼30 m) grid spacing. We train our correction algorithm on a unique set of reference elevation data from 12 countries, covering a wide range of climate zones and urban extents. Hence, this approach has much wider applicability compared to previous DEMs trained on data from a single country. Our method reduces mean absolute vertical error in built-up areas from 1.61 to 1.12 m, and in forests from 5.15 to 2.88 m. The new elevation map is more accurate than existing global elevation maps and will strengthen applications and models where high quality global terrain information is required.</dcterms:abstract>
+        <dc:date>2022-02</dc:date>
+        <z:language>en</z:language>
+        <z:libraryCatalog>Institute of Physics</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+               <rdf:value>https://doi.org/10.1088/1748-9326/ac4d4f</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 11:01:14</dcterms:dateSubmitted>
+        <dc:description>Publisher: IOP Publishing</dc:description>
+        <bib:pages>024016</bib:pages>
+    </bib:Article>
+    <bib:Journal rdf:about="urn:issn:1748-9326">
+        <prism:volume>17</prism:volume>
+        <dc:title>Environmental Research Letters</dc:title>
+        <dc:identifier>DOI 10.1088/1748-9326/ac4d4f</dc:identifier>
+        <prism:number>2</prism:number>
+        <dcterms:alternative>Environ. Res. Lett.</dcterms:alternative>
+        <dc:identifier>ISSN 1748-9326</dc:identifier>
+    </bib:Journal>
+    <z:Attachment rdf:about="#item_110">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>IOP Full Text PDF</dc:title>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://iopscience.iop.org/article/10.1088/1748-9326/ac4d4f/pdf</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 11:01:38</dcterms:dateSubmitted>
+        <z:linkMode>1</z:linkMode>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://www.nature.com/articles/sdata201566">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf rdf:resource="urn:issn:2052-4463"/>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Funk</foaf:surname>
+                        <foaf:givenName>Chris</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Peterson</foaf:surname>
+                        <foaf:givenName>Pete</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Landsfeld</foaf:surname>
+                        <foaf:givenName>Martin</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Pedreros</foaf:surname>
+                        <foaf:givenName>Diego</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Verdin</foaf:surname>
+                        <foaf:givenName>James</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Shukla</foaf:surname>
+                        <foaf:givenName>Shraddhanand</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Husak</foaf:surname>
+                        <foaf:givenName>Gregory</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Rowland</foaf:surname>
+                        <foaf:givenName>James</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Harrison</foaf:surname>
+                        <foaf:givenName>Laura</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Hoell</foaf:surname>
+                        <foaf:givenName>Andrew</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Michaelsen</foaf:surname>
+                        <foaf:givenName>Joel</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_113"/>
+        <dc:subject>
+            <z:AutomaticTag>
+               <rdf:value>Atmospheric dynamics</rdf:value>
+            </z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>Attribution</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+            <z:AutomaticTag>
+               <rdf:value>Climate-change impacts</rdf:value>
+            </z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+            <z:AutomaticTag>
+               <rdf:value>Environmental sciences</rdf:value>
+            </z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>Hydrology</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:title>The climate hazards infrared precipitation with stations—a new environmental record for monitoring extremes</dc:title>
+        <dcterms:abstract>The Climate Hazards group Infrared Precipitation with Stations (CHIRPS) dataset builds on previous approaches to ‘smart’ interpolation techniques and high resolution, long period of record precipitation estimates based on infrared Cold Cloud Duration (CCD) observations. The algorithm i) is built around a 0.05° climatology that incorporates satellite information to represent sparsely gauged locations, ii) incorporates daily, pentadal, and monthly 1981-present 0.05° CCD-based precipitation estimates, iii) blends station data to produce a preliminary information product with a latency of about 2 days and a final product with an average latency of about 3 weeks, and iv) uses a novel blending procedure incorporating the spatial correlation structure of CCD-estimates to assign interpolation weights. We present the CHIRPS algorithm, global and regional validation results, and show how CHIRPS can be used to quantify the hydrologic impacts of decreasing precipitation and rising air temperatures in the Greater Horn of Africa. Using the Variable Infiltration Capacity model, we show that CHIRPS can support effective hydrologic forecasts and trend analyses in southeastern Ethiopia.</dcterms:abstract>
+        <dc:date>2015-12-08</dc:date>
+        <z:language>en</z:language>
+        <z:libraryCatalog>www.nature.com</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+               <rdf:value>https://www.nature.com/articles/sdata201566</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 11:01:52</dcterms:dateSubmitted>
+        <dc:rights>2015 The Author(s)</dc:rights>
+        <dc:description>Publisher: Nature Publishing Group</dc:description>
+        <bib:pages>150066</bib:pages>
+    </bib:Article>
+    <bib:Journal rdf:about="urn:issn:2052-4463">
+        <prism:volume>2</prism:volume>
+        <dc:title>Scientific Data</dc:title>
+        <dc:identifier>DOI 10.1038/sdata.2015.66</dc:identifier>
+        <prism:number>1</prism:number>
+        <dcterms:alternative>Sci Data</dcterms:alternative>
+        <dc:identifier>ISSN 2052-4463</dc:identifier>
+    </bib:Journal>
+    <z:Attachment rdf:about="#item_113">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>Full Text PDF</dc:title>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://www.nature.com/articles/sdata201566.pdf</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 11:02:53</dcterms:dateSubmitted>
+        <z:linkMode>1</z:linkMode>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://onlinelibrary.wiley.com/doi/abs/10.1002/qj.3803">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf rdf:resource="urn:issn:1477-870X"/>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Hersbach</foaf:surname>
+                        <foaf:givenName>Hans</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Bell</foaf:surname>
+                        <foaf:givenName>Bill</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Berrisford</foaf:surname>
+                        <foaf:givenName>Paul</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Hirahara</foaf:surname>
+                        <foaf:givenName>Shoji</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Horányi</foaf:surname>
+                        <foaf:givenName>András</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Muñoz-Sabater</foaf:surname>
+                        <foaf:givenName>Joaquín</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Nicolas</foaf:surname>
+                        <foaf:givenName>Julien</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Peubey</foaf:surname>
+                        <foaf:givenName>Carole</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Radu</foaf:surname>
+                        <foaf:givenName>Raluca</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Schepers</foaf:surname>
+                        <foaf:givenName>Dinand</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Simmons</foaf:surname>
+                        <foaf:givenName>Adrian</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Soci</foaf:surname>
+                        <foaf:givenName>Cornel</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Abdalla</foaf:surname>
+                        <foaf:givenName>Saleh</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Abellan</foaf:surname>
+                        <foaf:givenName>Xavier</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Balsamo</foaf:surname>
+                        <foaf:givenName>Gianpaolo</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Bechtold</foaf:surname>
+                        <foaf:givenName>Peter</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Biavati</foaf:surname>
+                        <foaf:givenName>Gionata</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Bidlot</foaf:surname>
+                        <foaf:givenName>Jean</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Bonavita</foaf:surname>
+                        <foaf:givenName>Massimo</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>De Chiara</foaf:surname>
+                        <foaf:givenName>Giovanna</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Dahlgren</foaf:surname>
+                        <foaf:givenName>Per</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Dee</foaf:surname>
+                        <foaf:givenName>Dick</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Diamantakis</foaf:surname>
+                        <foaf:givenName>Michail</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Dragani</foaf:surname>
+                        <foaf:givenName>Rossana</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Flemming</foaf:surname>
+                        <foaf:givenName>Johannes</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Forbes</foaf:surname>
+                        <foaf:givenName>Richard</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Fuentes</foaf:surname>
+                        <foaf:givenName>Manuel</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Geer</foaf:surname>
+                        <foaf:givenName>Alan</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Haimberger</foaf:surname>
+                        <foaf:givenName>Leo</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Healy</foaf:surname>
+                        <foaf:givenName>Sean</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Hogan</foaf:surname>
+                        <foaf:givenName>Robin J.</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Hólm</foaf:surname>
+                        <foaf:givenName>Elías</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Janisková</foaf:surname>
+                        <foaf:givenName>Marta</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Keeley</foaf:surname>
+                        <foaf:givenName>Sarah</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Laloyaux</foaf:surname>
+                        <foaf:givenName>Patrick</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Lopez</foaf:surname>
+                        <foaf:givenName>Philippe</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Lupu</foaf:surname>
+                        <foaf:givenName>Cristina</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Radnoti</foaf:surname>
+                        <foaf:givenName>Gabor</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>de Rosnay</foaf:surname>
+                        <foaf:givenName>Patricia</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Rozum</foaf:surname>
+                        <foaf:givenName>Iryna</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Vamborg</foaf:surname>
+                        <foaf:givenName>Freja</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Villaume</foaf:surname>
+                        <foaf:givenName>Sebastien</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Thépaut</foaf:surname>
+                        <foaf:givenName>Jean-Noël</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <dc:subject>
+            <z:AutomaticTag>
+               <rdf:value>climate reanalysis</rdf:value>
+            </z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+            <z:AutomaticTag>
+               <rdf:value>Copernicus Climate Change Service</rdf:value>
+            </z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+            <z:AutomaticTag>
+               <rdf:value>data assimilation</rdf:value>
+            </z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>ERA5</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+            <z:AutomaticTag>
+               <rdf:value>historical observations</rdf:value>
+            </z:AutomaticTag>
+        </dc:subject>
+        <dc:title>The ERA5 global reanalysis</dc:title>
+        <dcterms:abstract>Within the Copernicus Climate Change Service (C3S), ECMWF is producing the ERA5 reanalysis which, once completed, will embody a detailed record of the global atmosphere, land surface and ocean waves from 1950 onwards. This new reanalysis replaces the ERA-Interim reanalysis (spanning 1979 onwards) which was started in 2006. ERA5 is based on the Integrated Forecasting System (IFS) Cy41r2 which was operational in 2016. ERA5 thus benefits from a decade of developments in model physics, core dynamics and data assimilation. In addition to a significantly enhanced horizontal resolution of 31 km, compared to 80 km for ERA-Interim, ERA5 has hourly output throughout, and an uncertainty estimate from an ensemble (3-hourly at half the horizontal resolution). This paper describes the general set-up of ERA5, as well as a basic evaluation of characteristics and performance, with a focus on the dataset from 1979 onwards which is currently publicly available. Re-forecasts from ERA5 analyses show a gain of up to one day in skill with respect to ERA-Interim. Comparison with radiosonde and PILOT data prior to assimilation shows an improved fit for temperature, wind and humidity in the troposphere, but not the stratosphere. A comparison with independent buoy data shows a much improved fit for ocean wave height. The uncertainty estimate reflects the evolution of the observing systems used in ERA5. The enhanced temporal and spatial resolution allows for a detailed evolution of weather systems. For precipitation, global-mean correlation with monthly-mean GPCP data is increased from 67% to 77%. In general, low-frequency variability is found to be well represented and from 10 hPa downwards general patterns of anomalies in temperature match those from the ERA-Interim, MERRA-2 and JRA-55 reanalyses.</dcterms:abstract>
+        <dc:date>2020</dc:date>
+        <z:language>en</z:language>
+        <z:libraryCatalog>Wiley Online Library</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://onlinelibrary.wiley.com/doi/abs/10.1002/qj.3803</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 11:02:21</dcterms:dateSubmitted>
+        <dc:rights>© 2020 The Authors. Quarterly Journal of the Royal Meteorological Society published by John Wiley &amp; Sons Ltd on behalf of the Royal Meteorological Society.</dc:rights>
+        <dc:description>_eprint: https://rmets.onlinelibrary.wiley.com/doi/pdf/10.1002/qj.3803</dc:description>
+        <bib:pages>1999-2049</bib:pages>
+    </bib:Article>
+    <bib:Journal rdf:about="urn:issn:1477-870X">
+        <prism:volume>146</prism:volume>
+        <dc:title>Quarterly Journal of the Royal Meteorological Society</dc:title>
+        <dc:identifier>DOI 10.1002/qj.3803</dc:identifier>
+        <prism:number>730</prism:number>
+        <dc:identifier>ISSN 1477-870X</dc:identifier>
+    </bib:Journal>
+    <rdf:Description rdf:about="https://fr.wikipedia.org/w/index.php?title=B%C3%A9nin&amp;oldid=229637777">
+        <z:itemType>encyclopediaArticle</z:itemType>
+        <dcterms:isPartOf>
+           <bib:Book><dc:title>Wikipédia</dc:title></bib:Book>
+        </dcterms:isPartOf>
+        <link:link rdf:resource="#item_115"/>
+        <dc:title>Bénin</dc:title>
+        <dcterms:abstract>Le Bénin (/be.nɛ̃/), en forme longue la république du Bénin (en fon : Benɛɛto), historiquement connu sous le nom de Dahomey, est un État d'Afrique de l'Ouest, qui couvre une superficie de 114 763 km2 et s'étend sur 700 km, du fleuve Niger au nord à la côte atlantique au sud. Le Bénin comptait 14 814 460 habitants en 2025. Le pays fait partie des États membres de la CEDEAO et a comme voisins le Togo à l'ouest, le Nigeria à l'est, le Niger au nord-est et le Burkina Faso au nord-ouest .
+Le Bénin a accédé à l'indépendance complète le 1er août 1960, sous la dénomination de république du Dahomey. Les pouvoirs furent transmis au président Hubert Maga par le ministre d'État français Louis Jacquinot. En tant que président, il prononce alors le discours d'accession du nouvel État à la souveraineté, à la même date. En 1972, l'officier Mathieu Kérékou prend le pouvoir : il adopte en 1974 le marxisme-léninisme comme idéologie officielle du gouvernement et, en 1975, rebaptise le pays république populaire du Bénin. À la fin des années 1980, des luttes internes du Parti communiste du Bénin et de graves difficultés économiques conduisent à une conférence nationale : le Bénin entame un processus de transition démocratique et, en 1990, adopte une nouvelle Constitution. Cette transition démocratique est assurée par Nicéphore Soglo, ancien directeur Afrique de la Banque mondiale. Le nom Bénin est conservé, le pays devenant simplement la république du Bénin. Mathieu Kérékou, battu aux élections par Nicéphore Soglo en 1991, rend le pouvoir. Il y revient démocratiquement en 1996 et ne rétablit pas la dictature. Il gouverne le pays jusqu'en 2006, pour deux mandats consécutifs, avant de se retirer à l'élection de Thomas Boni Yayi, ancien président de la BOAD. Après avoir fini ses deux mandats, il cède, le 6 avril 2016, la présidence à l’homme d’affaires, Patrice Talon qui remporte le second tour des présidentielles sur son dauphin Lionel Zinsou.
+Le Bénin est un régime présidentiel doté d'un vice-président ayant les prérogatives d'assurer la présidence en cas de vacance du pouvoir. Mariam Chabi Talata, le 11 avril 2021, devient la première femme à occuper la vice-présidence au Bénin et prit ses fonctions le 23 mai 2021.
+Constitutionnellement, la capitale du Bénin est Porto-Novo mais Cotonou est la principale ville du pays. Le Bénin a comme langue officielle le français et fait partie de plusieurs organisations internationales, dont l'Organisation internationale de la francophonie et l'Organisation de la coopération islamique. Le franc CFA est la monnaie utilisée par sa population.</dcterms:abstract>
+        <dc:date>2025-10-09T23:55:24Z</dc:date>
+        <z:language>fr</z:language>
+        <z:libraryCatalog>Wikipedia</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://fr.wikipedia.org/w/index.php?title=B%C3%A9nin&amp;oldid=229637777</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 11:16:09</dcterms:dateSubmitted>
+        <dc:rights>Creative Commons Attribution-ShareAlike License</dc:rights>
+        <dc:description>Page Version ID: 229637777</dc:description>
+    </rdf:Description>
+    <z:Attachment rdf:about="#item_115">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>Snapshot</dc:title>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://fr.wikipedia.org/w/index.php?title=B%C3%A9nin&amp;oldid=229637777</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 11:16:41</dcterms:dateSubmitted>
+        <z:linkMode>1</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Document rdf:about="https://presidence.bj/home/le-benin/geographie/">
+        <z:itemType>webpage</z:itemType>
+        <dcterms:isPartOf>
+            <z:Website>
+               <dc:title>Présidence de la République du Bénin</dc:title>
+            </z:Website>
+        </dcterms:isPartOf>
+        <link:link rdf:resource="#item_117"/>
+        <dc:title>La Géographie du Bénin</dc:title>
+        <dcterms:abstract>Actualités de la Présidence de la République du Bénin, Conseils des Ministres, Bénin Révélé, Découverte du Bénin.</dcterms:abstract>
+        <z:language>fr</z:language>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://presidence.bj/home/le-benin/geographie/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 11:18:14</dcterms:dateSubmitted>
+    </bib:Document>
+    <z:Attachment rdf:about="#item_117">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>Snapshot</dc:title>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://presidence.bj/home/le-benin/geographie/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 11:18:21</dcterms:dateSubmitted>
+        <z:linkMode>1</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Document rdf:about="https://data.bris.ac.uk/data/dataset/s5hqmjcdj8yo2ibzi9b4ew3sn">
+        <z:itemType>webpage</z:itemType>
+        <dcterms:isPartOf>
+           <z:Website><dc:title>data.bris</dc:title></z:Website>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Jeffrey Neal</foaf:surname>
+                        <foaf:givenName>Laurence Hawker</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_119"/>
+        <dc:title>FABDEM V1-2</dc:title>
+        <dcterms:abstract>FABDEM V1-2, an update on FABDEM V1-0. Changes detailed in FABDEM-V1-2 Changelog.pdf. FABDEM (Forest And Buildings removed Copernicus DEM) is a global elevation map that removes building and tree...</dcterms:abstract>
+        <dc:date>18 Jan 2023</dc:date>
+        <z:language>en_GB</z:language>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://data.bris.ac.uk/data/dataset/s5hqmjcdj8yo2ibzi9b4ew3sn</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 11:21:18</dcterms:dateSubmitted>
+        <dc:description>DOI: 10.5523/bris.s5hqmjcdj8yo2ibzi9b4ew3sn</dc:description>
+    </bib:Document>
+    <z:Attachment rdf:about="#item_119">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>Snapshot</dc:title>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://data.bris.ac.uk/data/dataset/s5hqmjcdj8yo2ibzi9b4ew3sn</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 11:21:32</dcterms:dateSubmitted>
+        <z:linkMode>1</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Document rdf:about="https://data.chc.ucsb.edu/products/CHIRPS-2.0/">
+        <z:itemType>webpage</z:itemType>
+        <dcterms:isPartOf>
+           <z:Website></z:Website>
+        </dcterms:isPartOf>
+        <link:link rdf:resource="#item_121"/>
+        <dc:title>Index of /products/CHIRPS-2.0/</dc:title>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://data.chc.ucsb.edu/products/CHIRPS-2.0/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 11:21:52</dcterms:dateSubmitted>
+    </bib:Document>
+    <z:Attachment rdf:about="#item_121">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>Index of /products/CHIRPS-2.0/</dc:title>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://data.chc.ucsb.edu/products/CHIRPS-2.0/</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 11:21:58</dcterms:dateSubmitted>
+        <z:linkMode>1</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Document rdf:about="https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels?tab=download">
+        <z:itemType>webpage</z:itemType>
+        <dcterms:isPartOf>
+           <z:Website></z:Website>
+        </dcterms:isPartOf>
+        <link:link rdf:resource="#item_123"/>
+        <dc:title>ERA5 hourly data on single levels from 1940 to present</dc:title>
+        <dcterms:abstract>ERA5 is the fifth generation ECMWF reanalysis for the global climate and weather for the past 8 decades.
+Data is available from 1940 onwards.
+ERA5 replaces the ERA-Interim reanalysis.
+Reanalysis combines model data with observations from across the world into a globally complete and consistent dataset using the laws of physics. This principle, called data assimilation, is based on the method used by numerical weather prediction centres, where every so many hours (12 hours at ECMWF) a previous forecast is combined with newly available observations in an optimal way to produce a new best estimate of the state of the atmosphere, called analysis, from which an updated, improved forecast is issued. Reanalysis works in the same way, but at reduced resolution to allow for the provision of a dataset spanning back several decades. Reanalysis does not have the constraint of issuing timely forecasts, so there is more time to collect observations, and when going further back in time, to allow for the ingestion of improved versions of the original observations, which all benefit the quality of the reanalysis product.
+ERA5 provides hourly estimates for a large number of atmospheric, ocean-wave and land-surface quantities.
+An uncertainty estimate is sampled by an underlying 10-member ensemble
+at three-hourly intervals. Ensemble mean and spread have been pre-computed for convenience.
+Such uncertainty estimates are closely related to the information content of the available observing system which
+has evolved considerably over time. They also indicate flow-dependent sensitive areas.
+To facilitate many climate applications, monthly-mean averages have been pre-calculated too,
+though monthly means are not available for the ensemble mean and spread.
+ERA5 is updated daily with a latency of about 5 days. In case that serious flaws are detected in this early release (called ERA5T), this data could be different from the final release 2 to 3 months later. In case that this occurs users are notified.
+The data set presented here is a regridded subset of the full ERA5 data set on native resolution.
+It is online on spinning disk, which should ensure fast and easy access.
+It should satisfy the requirements for most common applications.
+An overview of all ERA5 datasets can be found in this article.
+Information on access to ERA5 data on native resolution is provided in these guidelines.
+Data has been regridded to a regular lat-lon grid of 0.25 degrees for the reanalysis and 0.5 degrees for
+the uncertainty estimate (0.5 and 1 degree respectively for ocean waves).
+There are four main sub sets: hourly and monthly products, both on pressure levels (upper air fields) and single levels (atmospheric, ocean-wave and land surface quantities).
+The present entry is &quot;ERA5 hourly data on single levels from 1940 to present&quot;.</dcterms:abstract>
+        <z:language>en</z:language>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels?tab=download</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 11:22:35</dcterms:dateSubmitted>
+    </bib:Document>
+    <z:Attachment rdf:about="#item_123">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>Snapshot</dc:title>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://cds.climate.copernicus.eu/datasets/reanalysis-era5-single-levels?tab=download</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 11:22:43</dcterms:dateSubmitted>
+        <z:linkMode>1</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Document rdf:about="https://www.protectedplanet.net/12201?utm_source=chatgpt.com">
+        <z:itemType>webpage</z:itemType>
+        <dcterms:isPartOf>
+           <z:Website><dc:title>Protected Planet</dc:title></z:Website>
+        </dcterms:isPartOf>
+        <link:link rdf:resource="#item_125"/>
+        <dc:title>Protected Planet | W (Benin)</dc:title>
+        <dcterms:abstract>Explore the World's Protected Areas in W (Benin)</dcterms:abstract>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://www.protectedplanet.net/12201?utm_source=chatgpt.com</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 11:23:05</dcterms:dateSubmitted>
+    </bib:Document>
+    <z:Attachment rdf:about="#item_125">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>Snapshot</dc:title>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://www.protectedplanet.net/12201?utm_source=chatgpt.com</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 11:23:12</dcterms:dateSubmitted>
+        <z:linkMode>1</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Document rdf:about="https://www.protectedplanet.net/en/thematic-areas/wdpa?tab=WDPA">
+        <z:itemType>webpage</z:itemType>
+        <dcterms:isPartOf>
+           <z:Website><dc:title>Protected Planet</dc:title></z:Website>
+        </dcterms:isPartOf>
+        <link:link rdf:resource="#item_127"/>
+        <dc:title>Protected Areas (WDPA)</dc:title>
+        <dcterms:abstract>The World Database on Protected Areas (WDPA) is the most comprehensive global database on terrestrial and marine protected areas.</dcterms:abstract>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://www.protectedplanet.net/en/thematic-areas/wdpa?tab=WDPA</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 11:23:59</dcterms:dateSubmitted>
+    </bib:Document>
+    <z:Attachment rdf:about="#item_127">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>Snapshot</dc:title>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://www.protectedplanet.net/en/thematic-areas/wdpa?tab=WDPA</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 11:24:43</dcterms:dateSubmitted>
+        <z:linkMode>1</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Document rdf:about="#item_128">
+        <z:itemType>webpage</z:itemType>
+        <dcterms:isPartOf>
+           <z:Website><dc:title>Protected Planet</dc:title></z:Website>
+        </dcterms:isPartOf>
+        <link:link rdf:resource="#item_129"/>
+        <dc:title>Protected Areas (WDPA)</dc:title>
+        <dcterms:abstract>The World Database on Protected Areas (WDPA) is the most comprehensive global database on terrestrial and marine protected areas.</dcterms:abstract>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://www.protectedplanet.net/en/thematic-areas/wdpa?tab=WDPA</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 11:25:51</dcterms:dateSubmitted>
+    </bib:Document>
+    <z:Attachment rdf:about="#item_129">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>Snapshot</dc:title>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://www.protectedplanet.net/en/thematic-areas/wdpa?tab=WDPA</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 11:26:19</dcterms:dateSubmitted>
+        <z:linkMode>1</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://www.sciencedirect.com/science/article/pii/S163107130700096X">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf rdf:resource="urn:issn:1631-0713"/>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Kamagaté</foaf:surname>
+                        <foaf:givenName>Bamory</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Séguis</foaf:surname>
+                        <foaf:givenName>Luc</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Favreau</foaf:surname>
+                        <foaf:givenName>Guillaume</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Seidel</foaf:surname>
+                        <foaf:givenName>Jean-Luc</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Descloitres</foaf:surname>
+                        <foaf:givenName>Marc</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Affaton</foaf:surname>
+                        <foaf:givenName>Pascal</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_131"/>
+        <link:link rdf:resource="#item_132"/>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>Aquifère libre</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>Benin</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>Bénin</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>Groundwater</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>Hydrochemistry</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>Hydrochimie</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>Hydrodynamics</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>Hydrodynamique</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+            <z:AutomaticTag>
+               <rdf:value>Rivière tropicale</rdf:value>
+            </z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>Tropical river</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:title>Processus et bilan des flux hydriques d’un bassin versant de milieu tropical de socle au Bénin (Donga, haut Ouémé)</dc:title>
+        <dcterms:abstract>Résumé
+L’étude d’un bassin versant de 586km2 au Bénin (Afrique de l’Ouest) par des suivis hydrodynamiques et hydrochimiques, ainsi que par reconnaissance géophysique de subsurface, a permis de déterminer les processus et le bilan des flux hydriques sur deux années à pluviométrie contrastée. La recharge de la nappe phréatique s’effectue par infiltration directe des précipitations et représente de 5 à 24 % de la pluviométrie. L’écoulement à l’exutoire, limité à la saison des pluies ainsi que la minéralisation faible des eaux indiquent des flux nappe–rivière négligeables. Cette faible contribution de la nappe implique que les variations interannuelles du coefficient d’écoulement (de 14 à 28 %) sont principalement gouvernées par des flux de surface et de subsurface.
+Hydrodynamic, geochemical, and subsurface geophysical investigations, for two consecutive years with contrasting rainfall conditions, were used to characterize the hydrological processes occurring, and the water balance of a 586-km2 watershed in Benin (Africa). The water table's monitoring shows that recharge occurs by direct infiltration of rainfall, and represents between 5 to 24% of the annual rainfall. Both surface water outflow, limited to the rainy season, and water chemistry indicate a weak groundwater contribution to river discharge. This implies that the calculated variations in annual runoff coefficients (of 14 and 28%) are mainly governed by surface and subsurface flows.</dcterms:abstract>
+        <dc:date>2007-05-01</dc:date>
+        <z:libraryCatalog>ScienceDirect</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://www.sciencedirect.com/science/article/pii/S163107130700096X</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 15:11:55</dcterms:dateSubmitted>
+        <bib:pages>418-429</bib:pages>
+    </bib:Article>
+    <bib:Journal rdf:about="urn:issn:1631-0713">
+        <prism:volume>339</prism:volume>
+        <dc:title>Comptes Rendus Geoscience</dc:title>
+        <dc:identifier>DOI 10.1016/j.crte.2007.04.003</dc:identifier>
+        <prism:number>6</prism:number>
+        <dcterms:alternative>Comptes Rendus Geoscience</dcterms:alternative>
+        <dc:identifier>ISSN 1631-0713</dc:identifier>
+    </bib:Journal>
+    <z:Attachment rdf:about="#item_131">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>ScienceDirect Snapshot</dc:title>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://www.sciencedirect.com/science/article/pii/S163107130700096X</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 15:12:09</dcterms:dateSubmitted>
+        <z:linkMode>1</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <z:Attachment rdf:about="#item_132">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>Version soumise</dc:title>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://comptes-rendus.academie-sciences.fr/geoscience/item/10.1016/j.crte.2007.04.003.pdf</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 15:12:12</dcterms:dateSubmitted>
+        <z:linkMode>1</z:linkMode>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://www.mdpi.com/2073-4441/2/2/170">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <prism:volume>2</prism:volume>
+                <dc:title>Water</dc:title>
+                <dc:identifier>DOI 10.3390/w2020170</dc:identifier>
+                <prism:number>2</prism:number>
+                <dc:identifier>ISSN 2073-4441</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Amogu</foaf:surname>
+                        <foaf:givenName>Okechukwu</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Descroix</foaf:surname>
+                        <foaf:givenName>Luc</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Yéro</foaf:surname>
+                        <foaf:givenName>Kadidiatou Souley</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Le Breton</foaf:surname>
+                        <foaf:givenName>Eric</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Mamadou</foaf:surname>
+                        <foaf:givenName>Ibrahim</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Ali</foaf:surname>
+                        <foaf:givenName>Abdou</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Vischel</foaf:surname>
+                        <foaf:givenName>Théo</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Bader</foaf:surname>
+                        <foaf:givenName>Jean-Claude</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Moussa</foaf:surname>
+                        <foaf:givenName>Ibrahim Bouzou</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Gautier</foaf:surname>
+                        <foaf:givenName>Emmanuèle</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Boubkraoui</foaf:surname>
+                        <foaf:givenName>Stéphane</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Belleudy</foaf:surname>
+                        <foaf:givenName>Philippe</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_134"/>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>climate change</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>demography</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>drought</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>land use change</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>runoff</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>Sahel</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:title>Increasing River Flows in the Sahel?</dc:title>
+        <dcterms:abstract>Despite the drought observed since 1968 in most of the West African Sahel, runoff and rivers discharges have been increasing in the same region. This trend is related with land use change rather than climate change. This paper aims to describe the regional extension of such a phenomenon and to demonstrate that the increase in runoff is observed from the point scale up to the regional scale. It highlights the opposition of functioning between a Sahelian zone, where the Sahel’s paradox applies, and the Sudanian and Guinean areas, where runoff has been logically decreasing with the rainfall. The current trend is evidenced using experimental runoff plots and discharge data from the local to the regional scales.</dcterms:abstract>
+        <dc:date>2010/6</dc:date>
+        <z:language>en</z:language>
+        <z:libraryCatalog>www.mdpi.com</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+               <rdf:value>https://www.mdpi.com/2073-4441/2/2/170</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 15:53:47</dcterms:dateSubmitted>
+        <dc:rights>http://creativecommons.org/licenses/by/3.0/</dc:rights>
+        <dc:description>Publisher: Molecular Diversity Preservation International</dc:description>
+        <bib:pages>170-199</bib:pages>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_134">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>Full Text PDF</dc:title>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://www.mdpi.com/2073-4441/2/2/170/pdf?version=1433834431</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 15:53:56</dcterms:dateSubmitted>
+        <z:linkMode>1</z:linkMode>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://doi.org/10.1080/02626667.2020.1729360">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf rdf:resource="urn:issn:0262-6667"/>
+        <bib:authors>
+            <rdf:Seq>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Azuka</foaf:surname>
+                        <foaf:givenName>C. V.</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+                <rdf:li>
+                    <foaf:Person>
+                        <foaf:surname>Igué</foaf:surname>
+                        <foaf:givenName>A. M.</foaf:givenName>
+                    </foaf:Person>
+                </rdf:li>
+            </rdf:Seq>
+        </bib:authors>
+        <link:link rdf:resource="#item_136"/>
+        <dc:subject>
+            <z:AutomaticTag>
+               <rdf:value>coefficient de ruissellement</rdf:value>
+            </z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>hydrogramme</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+           <z:AutomaticTag><rdf:value>microparcelles</rdf:value></z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+            <z:AutomaticTag>
+               <rdf:value>précipitations–débit</rdf:value>
+            </z:AutomaticTag>
+        </dc:subject>
+        <dc:subject>
+            <z:AutomaticTag>
+               <rdf:value>utilisation des terres</rdf:value>
+            </z:AutomaticTag>
+        </dc:subject>
+        <dc:title>Surface runoff as influenced by slope position and land use in the Koupendri catchment of northwest Benin: field observation and model validation</dc:title>
+        <dcterms:abstract>The objective of this study was to evaluate: (i) the influence of slope position and land use on plot-scale runoff, and (ii) the ability of the curve number (CN) approach to estimate the measured runoff using microplots (1 m × 1 m) spaced 0.5 m apart. The study considered two slope positions: upslope (5.8%), and downslope (2.3%), and two land-use types: tilled maize-beans (TMB) intercrop and fallow shrub-grassland (FSG). Runoff was measured from September to November 2014 and from July to October 2015. The rainfall–runoff events in 2014 and 2015 were subjected to statistical analysis. The CN was computed with rainfall–runoff data. The results showed a significant (p &lt; 0.05) effect of land use on surface runoff in 2015. Neither the slope position nor its interaction with land use had a significant (p &lt; 0.05) effect on surface runoff. The runoff estimation captured the dynamics of runoff with better estimation observed under the TMB plot compared to the FSG.</dcterms:abstract>
+        <dc:date>2020-04-25</dc:date>
+        <z:shortTitle>Surface runoff as influenced by slope position and land use in the Koupendri catchment of northwest Benin</z:shortTitle>
+        <z:libraryCatalog>Taylor and Francis+NEJM</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://doi.org/10.1080/02626667.2020.1729360</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 15:57:29</dcterms:dateSubmitted>
+        <dc:description>Publisher: Taylor &amp; Francis
+_eprint: https://doi.org/10.1080/02626667.2020.1729360</dc:description>
+        <bib:pages>995-1004</bib:pages>
+    </bib:Article>
+    <bib:Journal rdf:about="urn:issn:0262-6667">
+        <prism:volume>65</prism:volume>
+        <dc:title>Hydrological Sciences Journal</dc:title>
+        <dc:identifier>DOI 10.1080/02626667.2020.1729360</dc:identifier>
+        <prism:number>6</prism:number>
+        <dc:identifier>ISSN 0262-6667</dc:identifier>
+    </bib:Journal>
+    <z:Attachment rdf:about="#item_136">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>Full Text PDF</dc:title>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://www.tandfonline.com/doi/pdf/10.1080/02626667.2020.1729360</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 15:57:39</dcterms:dateSubmitted>
+        <z:linkMode>1</z:linkMode>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://www.researchgate.net/publication/45267820_Increasing_River_Flows_in_the_Sahel">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+            <bib:Journal>
+                <dc:title>ResearchGate</dc:title>
+                <dc:identifier>DOI 10.3390/w2020170</dc:identifier>
+            </bib:Journal>
+        </dcterms:isPartOf>
+        <link:link rdf:resource="#item_139"/>
+        <link:link rdf:resource="#item_138"/>
+        <dc:title>(PDF) Increasing River Flows in the Sahel?</dc:title>
+        <dcterms:abstract>PDF | Despite the drought observed since 1968 in most of the West African Sahel, runoff and rivers discharges have been increasing in the same region.... | Find, read and cite all the research you need on ResearchGate</dcterms:abstract>
+        <dc:date>2025-10-16</dc:date>
+        <z:language>en</z:language>
+        <z:libraryCatalog>www.researchgate.net</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://www.researchgate.net/publication/45267820_Increasing_River_Flows_in_the_Sahel</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 16:00:47</dcterms:dateSubmitted>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_139">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>Snapshot</dc:title>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://www.researchgate.net/publication/45267820_Increasing_River_Flows_in_the_Sahel</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 16:01:08</dcterms:dateSubmitted>
+        <z:linkMode>1</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <z:Attachment rdf:about="#item_138">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>Texte intégral</dc:title>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://www.mdpi.com/2073-4441/2/2/170/pdf?version=1433834431</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 16:00:51</dcterms:dateSubmitted>
+        <z:linkMode>1</z:linkMode>
+        <link:type>application/pdf</link:type>
+    </z:Attachment>
+    <bib:Document rdf:about="https://www.researchgate.net/publication/286184884_Evolution_des_pluies_extremes_et_recrudescence_des_crues_au_Sahel">
+        <z:itemType>webpage</z:itemType>
+        <dcterms:isPartOf>
+           <z:Website><dc:title>ResearchGate</dc:title></z:Website>
+        </dcterms:isPartOf>
+        <link:link rdf:resource="#item_141"/>
+        <dc:title>(PDF) Evolution des pluies extrêmes et recrudescence des crues au Sahel</dc:title>
+        <dcterms:abstract>PDF | On Jan 1, 2013, Luc Descroix and others published Evolution des pluies extrêmes et recrudescence des crues au Sahel | Find, read and cite all the research you need on ResearchGate</dcterms:abstract>
+        <z:language>en</z:language>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://www.researchgate.net/publication/286184884_Evolution_des_pluies_extremes_et_recrudescence_des_crues_au_Sahel</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 16:02:54</dcterms:dateSubmitted>
+    </bib:Document>
+    <z:Attachment rdf:about="#item_141">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>Snapshot</dc:title>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://www.researchgate.net/publication/286184884_Evolution_des_pluies_extremes_et_recrudescence_des_crues_au_Sahel</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 16:03:28</dcterms:dateSubmitted>
+        <z:linkMode>1</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+    <bib:Article rdf:about="https://www.researchgate.net/publication/50346108_Analysis_of_the_Runoff_for_Watershed_Using_SCS-CN_Method_and_Geographic_Information_Systems">
+        <z:itemType>journalArticle</z:itemType>
+        <dcterms:isPartOf>
+           <bib:Journal><dc:title>ResearchGate</dc:title></bib:Journal>
+        </dcterms:isPartOf>
+        <link:link rdf:resource="#item_143"/>
+        <dc:title>(PDF) Analysis of the Runoff for Watershed Using SCS-CN Method and Geographic Information Systems</dc:title>
+        <dcterms:abstract>PDF | The Soil Conservation Service Curve Number (SCS-CN) method is widely used for predicting direct runoff volume for a given rainfall event. The... | Find, read and cite all the research you need on ResearchGate</dcterms:abstract>
+        <dc:date>2025-08-10</dc:date>
+        <z:language>en</z:language>
+        <z:libraryCatalog>www.researchgate.net</z:libraryCatalog>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://www.researchgate.net/publication/50346108_Analysis_of_the_Runoff_for_Watershed_Using_SCS-CN_Method_and_Geographic_Information_Systems</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 16:09:22</dcterms:dateSubmitted>
+    </bib:Article>
+    <z:Attachment rdf:about="#item_143">
+        <z:itemType>attachment</z:itemType>
+        <dc:title>Snapshot</dc:title>
+        <dc:identifier>
+            <dcterms:URI>
+                <rdf:value>https://www.researchgate.net/publication/50346108_Analysis_of_the_Runoff_for_Watershed_Using_SCS-CN_Method_and_Geographic_Information_Systems</rdf:value>
+            </dcterms:URI>
+        </dc:identifier>
+        <dcterms:dateSubmitted>2025-11-06 16:09:37</dcterms:dateSubmitted>
+        <z:linkMode>1</z:linkMode>
+        <link:type>text/html</link:type>
+    </z:Attachment>
+</rdf:RDF>

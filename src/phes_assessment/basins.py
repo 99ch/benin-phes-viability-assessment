@@ -22,6 +22,7 @@ from shapely.ops import transform as shapely_transform, unary_union
 from pyproj import Transformer
 
 from .config import DataPaths, get_paths
+from .crs import utm_epsg_for_point
 from .fabdem import DEFAULT_SITES_FILE, tile_path
 from .sites import load_sites
 
@@ -40,13 +41,6 @@ def _ensure_whitebox() -> WhiteboxTools:
     return WhiteboxTools()
 
 
-def _utm_epsg(lat: float, lon: float) -> int:
-    zone = int((lon + 180) / 6) + 1
-    if lat >= 0:
-        return 32600 + zone
-    return 32700 + zone
-
-
 def _lat_lon_buffer(lat: float, margin_km: float) -> Tuple[float, float]:
     margin_m = margin_km * 1000.0
     deg_lat = margin_m / 111_320.0
@@ -62,8 +56,13 @@ def _slugify(value: str) -> str:
 
 
 def _clip_dem(tile: Path, bounds: Tuple[float, float, float, float], output: Path) -> Path:
+    left, bottom, right, top = bounds
     with rasterio.open(tile) as src:
-        left, bottom, right, top = bounds
+        tile_bounds = src.bounds
+        if left < tile_bounds.left or right > tile_bounds.right or bottom < tile_bounds.bottom or top > tile_bounds.top:
+            raise RuntimeError(
+                f"La marge demandée dépasse l'emprise de la tuile FABDEM ({tile.name}). Réduisez --dem-margin-km ou ajoutez les tuiles adjacentes."
+            )
         window = windows.from_bounds(left, bottom, right, top, transform=src.transform)
         window = window.round_offsets().round_lengths()
         window = window.intersection(windows.Window(col_off=0, row_off=0, width=src.width, height=src.height))
@@ -164,6 +163,8 @@ def delineate_site_basin(
     try:
         slug = _slugify(pair_identifier)
         site_dir = dem_dir / slug
+        if site_dir.exists():
+            shutil.rmtree(site_dir)
         site_dir.mkdir(parents=True, exist_ok=True)
         wbt.work_dir = str(site_dir)
         tile = tile_path(paths, lat, lon)
@@ -188,7 +189,7 @@ def delineate_site_basin(
             raise RuntimeError(f"Whitebox n'a pas généré de raster de bassin versant pour {pair_identifier}")
 
         geometry = _watershed_geometry(watershed)
-        utm_epsg = _utm_epsg(lat, lon)
+        utm_epsg = utm_epsg_for_point(lat, lon)
         to_utm = Transformer.from_crs("EPSG:4326", f"EPSG:{utm_epsg}", always_xy=True)
         geom_utm = shapely_transform(to_utm.transform, geometry)
         area_m2 = geom_utm.area
@@ -219,6 +220,8 @@ def delineate_basins(
     paths = paths or get_paths()
     csv_path = sites_csv or (paths.data_dir / DEFAULT_SITES_FILE)
     df = load_sites(csv_path)
+    upper_lat = pd.to_numeric(df["Upper latitude"], errors="coerce")
+    upper_lon = pd.to_numeric(df["Upper longitude"], errors="coerce")
     cleanup_base = False
     if work_dir is None:
         tmp_dir = Path(tempfile.mkdtemp())
@@ -229,10 +232,12 @@ def delineate_basins(
 
     basins: List[SiteBasin] = []
     try:
-        for _, row in df.iterrows():
+        for idx, row in df.iterrows():
             pair = str(row["Pair Identifier"]).strip()
-            lat = float(row["Upper latitude"])
-            lon = float(row["Upper longitude"])
+            lat = float(upper_lat.iloc[idx])
+            lon = float(upper_lon.iloc[idx])
+            if math.isnan(lat) or math.isnan(lon):
+                raise ValueError(f"Coordonnées upper manquantes pour {pair}")
             basin = delineate_site_basin(paths, pair, lat, lon, margin_km=margin_km, work_dir=tmp_dir)
             basins.append(basin)
     finally:
@@ -289,7 +294,7 @@ def load_site_basins(path: Path) -> Dict[str, SiteBasin]:
         upper_lat = float(props.get("upper_lat", geometry.centroid.y))
         upper_lon = float(props.get("upper_lon", geometry.centroid.x))
         if utm_epsg == 0:
-            utm_epsg = _utm_epsg(upper_lat, upper_lon)
+            utm_epsg = utm_epsg_for_point(upper_lat, upper_lon)
         area_m2 = area_km2 * 1_000_000.0
         if area_m2 <= 0:
             to_utm = Transformer.from_crs("EPSG:4326", f"EPSG:{utm_epsg}", always_xy=True)

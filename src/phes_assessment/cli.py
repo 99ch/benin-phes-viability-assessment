@@ -1,6 +1,7 @@
 """Interface en ligne de commande pour l'inventaire des données."""
 from __future__ import annotations
 
+import json
 import math
 from datetime import date, datetime
 from pathlib import Path
@@ -12,7 +13,6 @@ from rich.console import Console
 from rich.progress import Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
 from rich.table import Table
 
-from .ahp import AHPWeights, compute_ahp_scores, load_hydrology_summary as load_ahp_summary
 from .ahp import AHPWeights, compute_ahp_scores, load_hydrology_summary as load_ahp_summary
 from .basins import delineate_basins, export_basins_geojson, load_site_basins
 from .catalog import summarize_directory
@@ -31,6 +31,50 @@ from .sites import build_site_masks, export_masks_geojson, load_sites
 
 app = typer.Typer(help="Outils CLI pour l'étude PHES")
 console = Console()
+
+
+def _resolve_path(base: Path, candidate: Optional[Path]) -> Optional[Path]:
+    if candidate is None:
+        return None
+    if candidate.is_absolute():
+        return candidate
+    return (base / candidate).resolve()
+
+
+def _ensure_range(label: str, minimum: float, maximum: float) -> tuple[float, float]:
+    if minimum < 0 or maximum < 0:
+        raise typer.BadParameter(f"{label} doit être positif.")
+    if minimum >= maximum:
+        raise typer.BadParameter(f"{label} min ({minimum}) doit être strictement inférieur au max ({maximum}).")
+    return minimum, maximum
+
+
+def _load_weights_config(path: Path) -> dict[str, float]:
+    text = path.read_text(encoding="utf-8")
+    suffix = path.suffix.lower()
+    data: dict[str, float]
+    if suffix in {".yaml", ".yml"}:
+        try:  # pragma: no cover - dépendance optionnelle
+            import yaml  # type: ignore
+        except ImportError as exc:  # pragma: no cover
+            raise typer.BadParameter(
+                "pyyaml n'est pas installé : utilisez un fichier JSON ou installez PyYAML."
+            ) from exc
+        parsed = yaml.safe_load(text)
+    else:
+        parsed = json.loads(text)
+    if not isinstance(parsed, dict):
+        raise typer.BadParameter("Le fichier de configuration doit contenir un objet clé/valeur.")
+    data = {}
+    for key, value in parsed.items():
+        try:
+            data[key] = float(value)
+        except (TypeError, ValueError):
+            raise typer.BadParameter(
+                f"Valeur non numérique pour '{key}' dans {path}"
+            )
+    return data
+
 
 @app.command()
 def data_catalog(root: Optional[Path] = typer.Option(None, "--root", help="Chemin vers la racine du dépôt")) -> None:
@@ -77,7 +121,7 @@ def data_qa(
     """Exécute des contrôles qualité rapides sur CHIRPS, ERA5 et FABDEM."""
 
     paths = get_paths(root)
-    csv_path = sites_csv or (paths.data_dir / DEFAULT_SITES_FILE)
+    csv_path = _resolve_path(paths.root, sites_csv) if sites_csv else (paths.data_dir / DEFAULT_SITES_FILE)
     reports = run_quality_checks(paths, start_year=start_year, end_year=end_year, sites_csv=csv_path)
 
     table = Table(title="Contrôles qualité datasets", header_style="bold magenta")
@@ -118,7 +162,7 @@ def fabdem_sample(
     """Échantillonne les altitudes FABDEM pour les sites sélectionnés."""
 
     paths = get_paths(root)
-    csv_path = sites_csv or (paths.data_dir / DEFAULT_SITES_FILE)
+    csv_path = _resolve_path(paths.root, sites_csv) if sites_csv else (paths.data_dir / DEFAULT_SITES_FILE)
     df = sample_sites(paths, csv_path)
     summary = summarize_head_gaps(df)
 
@@ -139,9 +183,10 @@ def fabdem_sample(
     console.print(table)
 
     if output:
-        output.parent.mkdir(parents=True, exist_ok=True)
-        df.to_csv(output, index=False)
-        console.print(f"Résultats détaillés exportés dans {output}")
+        output_path = _resolve_path(paths.root, output) or output
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        df.to_csv(output_path, index=False)
+        console.print(f"Résultats détaillés exportés dans {output_path}")
 
 
 @app.command()
@@ -154,6 +199,11 @@ def climate_series(
     end_year: Optional[int] = typer.Option(2023, help="Année de fin (None pour tout l'historique)", show_default=True),
     buffer_meters: float = typer.Option(500.0, help="Rayon du buffer appliqué autour de chaque réservoir (m)", show_default=True),
     basins: Optional[Path] = typer.Option(None, "--basins", help="GeoJSON des bassins versants à utiliser à la place des buffers"),
+    geometry_mode: str = typer.Option(
+        "auto",
+        help="Mode d'échantillonnage spatial: auto (basins si dispo), buffers ou basins",
+        show_default=True,
+    ),
 ) -> None:
     """Calcule les séries climatiques (CHIRPS/ERA5) agrégées par site."""
 
@@ -161,9 +211,8 @@ def climate_series(
     start_date = date(start_year, 1, 1) if start_year else None
     end_date = date(end_year, 12, 31) if end_year else None
     progress_callback = None
-    basins_path = basins
-    if basins_path and not basins_path.is_absolute():
-        basins_path = paths.root / basins_path
+    basins_path = _resolve_path(paths.root, basins)
+    csv_path = _resolve_path(paths.root, sites_csv) if sites_csv else None
 
     def _build_progress_callback(progress: Progress, tasks: dict[str, int]):
         def _callback(metric: str, _path: Path) -> None:
@@ -191,39 +240,43 @@ def climate_series(
             progress_callback = _build_progress_callback(progress, tasks)
             df = aggregate_series(
                 paths,
-                sites_csv,
+                csv_path,
                 dataset,
                 buffer_meters=buffer_meters,
                 basins_geojson=basins_path,
                 start_date=start_date,
                 end_date=end_date,
                 on_raster_processed=progress_callback,
+                geometry_mode=geometry_mode,
             )
     else:
         df = aggregate_series(
             paths,
-            sites_csv,
+            csv_path,
             dataset,
             buffer_meters=buffer_meters,
             basins_geojson=basins_path,
             start_date=start_date,
             end_date=end_date,
+            geometry_mode=geometry_mode,
         )
 
     console.print(f"{len(df)} enregistrements générés pour {df['pair_identifier'].nunique()} sites")
     console.print(df.head())
 
     if output:
+        actual_output = _resolve_path(paths.root, output) or output
         actual = export_series(
-            output,
+            actual_output,
             paths,
-            sites_csv,
+            csv_path,
             dataset,
             buffer_meters=buffer_meters,
             basins_geojson=basins_path,
             start_date=start_date,
             end_date=end_date,
             dataframe=df,
+            geometry_mode=geometry_mode,
         )
         console.print(f"Séries sauvegardées dans {actual}")
 
@@ -234,21 +287,26 @@ def site_masks(
     sites_csv: Optional[Path] = typer.Option(None, "--sites", help="CSV des sites"),
     output: Path = typer.Option(Path("results/site_masks.geojson"), help="Fichier GeoJSON de sortie"),
     buffer_meters: float = typer.Option(500.0, help="Rayon du buffer pour chaque réservoir (m)", show_default=True),
-    utm_epsg: int = typer.Option(32631, help="Code EPSG utilisé pour projeter les points", show_default=True),
+    utm_epsg: Optional[int] = typer.Option(
+        None,
+        help="EPSG UTM pour les buffers (auto par défaut en fonction des coordonnées)",
+        show_default=True,
+    ),
 ) -> None:
     """Exporte les buffers de chaque site PHES sous forme de GeoJSON."""
 
     paths = get_paths(root)
-    csv_path = sites_csv or (paths.data_dir / DEFAULT_SITES_FILE)
+    csv_path = _resolve_path(paths.root, sites_csv) if sites_csv else (paths.data_dir / DEFAULT_SITES_FILE)
     df = load_sites(csv_path)
     masks = build_site_masks(df, buffer_meters=buffer_meters, utm_epsg=utm_epsg)
     metadata = {
         "buffer_meters": buffer_meters,
-        "utm_epsg": utm_epsg,
+        "utm_epsg": utm_epsg or "auto",
         "site_count": len(masks),
         "source_csv": str(csv_path),
     }
-    geojson_path = export_masks_geojson(output, masks, metadata=metadata)
+    output_path = _resolve_path(paths.root, output) or output
+    geojson_path = export_masks_geojson(output_path, masks, metadata=metadata)
     console.print(f"{len(masks)} masques exportés dans {geojson_path}")
 
 
@@ -263,11 +321,9 @@ def site_basins(
     """Dérive les bassins versants en amont de chaque site PHES à partir du FABDEM."""
 
     paths = get_paths(root)
-    csv_path = sites_csv or (paths.data_dir / DEFAULT_SITES_FILE)
-    actual_output = output if output.is_absolute() else (paths.root / output)
-    actual_work_dir = work_dir
-    if actual_work_dir and not actual_work_dir.is_absolute():
-        actual_work_dir = paths.root / actual_work_dir
+    csv_path = _resolve_path(paths.root, sites_csv) if sites_csv else (paths.data_dir / DEFAULT_SITES_FILE)
+    actual_output = _resolve_path(paths.root, output) or output
+    actual_work_dir = _resolve_path(paths.root, work_dir)
 
     try:
         basins = delineate_basins(paths, csv_path, margin_km=dem_margin_km, work_dir=actual_work_dir)
@@ -301,22 +357,65 @@ def hydro_sim(
     ),
     sensitivity_iterations: Optional[int] = typer.Option(2000, help="Iterations Monte Carlo pour la sensibilité"),
     sensitivity_output: Optional[Path] = typer.Option(None, help="Fichier output des indices de sensibilité"),
+    runoff_min: float = typer.Option(0.3, help="Borne basse du coefficient de ruissellement"),
+    runoff_max: float = typer.Option(0.8, help="Borne haute du coefficient de ruissellement"),
+    runoff_alpha: float = typer.Option(3.5, help="Paramètre alpha de la loi Beta du ruissellement"),
+    runoff_beta: float = typer.Option(4.0, help="Paramètre beta de la loi Beta du ruissellement"),
+    infiltration_min: float = typer.Option(0.05, help="Borne basse du coefficient d'infiltration"),
+    infiltration_max: float = typer.Option(0.25, help="Borne haute du coefficient d'infiltration"),
+    infiltration_alpha: float = typer.Option(2.0, help="Paramètre alpha de la loi Beta d'infiltration"),
+    infiltration_beta: float = typer.Option(5.0, help="Paramètre beta de la loi Beta d'infiltration"),
+    initial_storage_fraction: float = typer.Option(0.6, help="Taux de remplissage initial du réservoir"),
+    evap_mean: float = typer.Option(1.0, help="Moyenne du multiplicateur appliqué à l'ETP"),
+    evap_std: float = typer.Option(0.1, help="Écart-type du multiplicateur ETP"),
+    evap_min: float = typer.Option(0.5, help="Borne basse du multiplicateur ETP"),
+    evap_max: float = typer.Option(1.5, help="Borne haute du multiplicateur ETP"),
+    leakage_min: float = typer.Option(0.0005, help="Borne basse des fuites mensuelles (fraction du stock)"),
+    leakage_max: float = typer.Option(0.002, help="Borne haute des fuites mensuelles (fraction du stock)"),
 ) -> None:
     """Lance la simulation hydrologique stochastique pour les 12 sites."""
 
     paths = get_paths(root)
-    climate_path = climate if climate.is_absolute() else (paths.root / climate)
-    csv_path = sites_csv or (paths.data_dir / DEFAULT_SITES_FILE)
+    climate_path = _resolve_path(paths.root, climate) or climate
+    csv_path = _resolve_path(paths.root, sites_csv) if sites_csv else (paths.data_dir / DEFAULT_SITES_FILE)
     climate_df = load_climate_series(climate_path)
-    basins_path = basins
-    if basins_path and not basins_path.is_absolute():
-        basins_path = paths.root / basins_path
-    basin_areas = None
-    if basins_path:
-        basin_map = load_site_basins(basins_path)
-        basin_areas = {pair: basin.area_m2 for pair, basin in basin_map.items()}
+    basins_path = _resolve_path(paths.root, basins)
+    if basins_path is None:
+        raise typer.BadParameter("Ce workflow requiert un GeoJSON de bassins versants. Fournissez --basins.", param_hint="--basins")
+    basin_map = load_site_basins(basins_path)
+    basin_areas = {pair: basin.area_m2 for pair, basin in basin_map.items()}
     params = load_site_parameters(csv_path, basin_areas_m2=basin_areas)
-    config = HydrologyModelConfig(iterations=iterations, seed=seed)
+    missing_basin_pairs = [pair for pair, param in params.items() if param.basin_area_km2 is None]
+    if missing_basin_pairs:
+        raise typer.BadParameter(
+            "Les bassins suivants sont absents du GeoJSON fourni : " + ", ".join(sorted(missing_basin_pairs))
+        )
+    runoff_range = _ensure_range("runoff", runoff_min, runoff_max)
+    infiltration_range = _ensure_range("infiltration", infiltration_min, infiltration_max)
+    evap_bounds = _ensure_range("multiplicateur ETP", evap_min, evap_max)
+    leakage_fraction = _ensure_range("fuites", leakage_min, leakage_max)
+    if not 0 < initial_storage_fraction <= 1:
+        raise typer.BadParameter("--initial-storage-fraction doit être compris entre 0 et 1.")
+    if evap_std < 0:
+        raise typer.BadParameter("--evap-std doit être positif.")
+    if runoff_range[1] > 1 or infiltration_range[1] > 1:
+        raise typer.BadParameter("Les coefficients de ruissellement/infiltration doivent rester ≤ 1.")
+
+    config = HydrologyModelConfig(
+        iterations=iterations,
+        seed=seed,
+        runoff_range=runoff_range,
+        runoff_alpha=runoff_alpha,
+        runoff_beta=runoff_beta,
+        infiltration_range=infiltration_range,
+        infiltration_alpha=infiltration_alpha,
+        infiltration_beta=infiltration_beta,
+        evap_mean=evap_mean,
+        evap_std=evap_std,
+        evap_bounds=evap_bounds,
+        leakage_fraction=leakage_fraction,
+        initial_storage_fraction=initial_storage_fraction,
+    )
     df = run_hydrology_simulation_from_data(climate_df, params, config)
 
     table = Table(title="Synthèse hydrologique", header_style="bold blue")
@@ -342,7 +441,7 @@ def hydro_sim(
     console.print(table)
 
     if output:
-        actual = output if output.is_absolute() else (paths.root / output)
+        actual = _resolve_path(paths.root, output) or output
         actual.parent.mkdir(parents=True, exist_ok=True)
         if actual.suffix == ".parquet":
             try:
@@ -421,13 +520,11 @@ def hydro_sim(
                         )
             console.print(table)
 
-            output_path = sensitivity_output
+            output_path = _resolve_path(paths.root, sensitivity_output)
             if output_path is None and output:
-                actual = output if output.is_absolute() else (paths.root / output)
+                actual = _resolve_path(paths.root, output) or output
                 suffix = actual.suffix or ".csv"
                 output_path = actual.with_name(f"{actual.stem}_sensitivity{suffix}")
-            elif output_path and not output_path.is_absolute():
-                output_path = paths.root / output_path
 
             if output_path:
                 output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -459,28 +556,50 @@ def ahp_rank(
     lifetime_years: int = typer.Option(60, help="Durée de vie (années)", show_default=True),
     discount_rate: float = typer.Option(0.05, help="Taux d'actualisation", show_default=True),
     round_trip_efficiency: float = typer.Option(0.81, help="Efficacité cycle", show_default=True),
+    weights_config: Optional[Path] = typer.Option(None, "--weights-config", help="JSON/YAML définissant les poids AHP et/ou les paramètres LCOS"),
 ) -> None:
     """Classe les sites via un AHP simplifié reliant classe économique et hydrologie."""
 
     paths = get_paths(root)
-    sites_path = sites_csv or (paths.data_dir / DEFAULT_SITES_FILE)
-    hydro_path = hydrology_summary if hydrology_summary.is_absolute() else (paths.root / hydrology_summary)
+    sites_path = _resolve_path(paths.root, sites_csv) if sites_csv else (paths.data_dir / DEFAULT_SITES_FILE)
+    hydro_path = _resolve_path(paths.root, hydrology_summary) or hydrology_summary
 
     sites_df = load_sites(sites_path)
     hydro_df = load_ahp_summary(hydro_path)
+    config_values = {
+        "economic_weight": economic_weight,
+        "hydrology_weight": hydrology_weight,
+        "infrastructure_weight": infrastructure_weight,
+        "cycles_per_year": float(cycles_per_year),
+        "lifetime_years": float(lifetime_years),
+        "discount_rate": discount_rate,
+        "round_trip_efficiency": round_trip_efficiency,
+    }
+
+    if weights_config:
+        config_path = _resolve_path(paths.root, weights_config) or weights_config
+        overrides = _load_weights_config(config_path)
+        unknown = [key for key in overrides if key not in config_values]
+        if unknown:
+            raise typer.BadParameter(
+                "Clés non supportées dans --weights-config : " + ", ".join(sorted(unknown)),
+                param_hint="--weights-config",
+            )
+        config_values.update(overrides)
+
     weights = AHPWeights(
-        economic=economic_weight,
-        hydrology=hydrology_weight,
-        infrastructure=infrastructure_weight,
+        economic=float(config_values["economic_weight"]),
+        hydrology=float(config_values["hydrology_weight"]),
+        infrastructure=float(config_values["infrastructure_weight"]),
     )
     scores = compute_ahp_scores(
         sites_df,
         hydro_df,
         weights=weights,
-        cycles_per_year=cycles_per_year,
-        lifetime_years=lifetime_years,
-        discount_rate=discount_rate,
-        round_trip_efficiency=round_trip_efficiency,
+        cycles_per_year=int(config_values["cycles_per_year"]),
+        lifetime_years=int(config_values["lifetime_years"]),
+        discount_rate=float(config_values["discount_rate"]),
+        round_trip_efficiency=float(config_values["round_trip_efficiency"]),
     )
 
     table = Table(title="Classement AHP", header_style="bold green")
@@ -510,7 +629,7 @@ def ahp_rank(
     console.print(table)
 
     if output:
-        actual = output if output.is_absolute() else (paths.root / output)
+        actual = _resolve_path(paths.root, output) or output
         actual.parent.mkdir(parents=True, exist_ok=True)
         if actual.suffix == ".parquet":
             scores.to_parquet(actual)

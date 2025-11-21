@@ -5,13 +5,18 @@ import json
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, Iterable, List
+from typing import Any, Dict, Iterable, List, Optional
 
 import pandas as pd
+from math import isnan
+from typing import Optional
+
 from pyproj import Transformer
 from shapely.geometry import Point
 from shapely.geometry.base import BaseGeometry
 from shapely.ops import transform, unary_union
+
+from .crs import utm_epsg_for_point
 
 SITE_COORD_COLUMNS = {
     "upper": ("Upper latitude", "Upper longitude"),
@@ -42,28 +47,56 @@ def load_sites(csv_path: Path) -> pd.DataFrame:
     return df
 
 
-def _buffer_point(lat: float, lon: float, buffer_meters: float, to_proj: Transformer, to_geo: Transformer) -> BaseGeometry:
+def _buffer_point(
+    lat: float,
+    lon: float,
+    buffer_meters: float,
+    to_proj: Transformer,
+    to_geo: Transformer,
+) -> BaseGeometry:
     point = Point(lon, lat)
     projected = transform(to_proj.transform, point)
     buffered = projected.buffer(buffer_meters)
     return transform(to_geo.transform, buffered)
 
 
-def build_site_masks(df: pd.DataFrame, buffer_meters: float = 500.0, utm_epsg: int = 32631) -> List[SiteMask]:
-    """Construit des buffers simples autour des réservoirs upper/lower et les fusionne par paire."""
+def _transformers_for_epsg(epsg: int) -> tuple[Transformer, Transformer]:
+    to_proj = Transformer.from_crs("EPSG:4326", f"EPSG:{epsg}", always_xy=True)
+    to_geo = Transformer.from_crs(f"EPSG:{epsg}", "EPSG:4326", always_xy=True)
+    return to_proj, to_geo
 
-    to_proj = Transformer.from_crs("EPSG:4326", f"EPSG:{utm_epsg}", always_xy=True)
-    to_geo = Transformer.from_crs(f"EPSG:{utm_epsg}", "EPSG:4326", always_xy=True)
+
+def _extract_coordinate(row: pd.Series, lat_col: str, lon_col: str, pair: str) -> tuple[float, float]:
+    lat = float(row.get(lat_col, float("nan")))
+    lon = float(row.get(lon_col, float("nan")))
+    if isnan(lat) or isnan(lon):
+        raise ValueError(f"Coordonnées manquantes pour {pair} ({lat_col}/{lon_col})")
+    return lat, lon
+
+
+def build_site_masks(
+    df: pd.DataFrame,
+    buffer_meters: float = 500.0,
+    utm_epsg: Optional[int] = None,
+) -> List[SiteMask]:
+    """Construit des buffers simples autour des réservoirs et les fusionne par paire."""
+
+    fixed_epsg = utm_epsg
+    transformers_cache: dict[int, tuple[Transformer, Transformer]] = {}
 
     masks: List[SiteMask] = []
     for _, row in df.iterrows():
+        pair_id = str(row["Pair Identifier"])
         buffers = []
         for lat_col, lon_col in SITE_COORD_COLUMNS.values():
-            lat = float(row[lat_col])
-            lon = float(row[lon_col])
+            lat, lon = _extract_coordinate(row, lat_col, lon_col, pair_id)
+            epsg = fixed_epsg or utm_epsg_for_point(lat, lon)
+            if epsg not in transformers_cache:
+                transformers_cache[epsg] = _transformers_for_epsg(epsg)
+            to_proj, to_geo = transformers_cache[epsg]
             buffers.append(_buffer_point(lat, lon, buffer_meters, to_proj, to_geo))
         geometry = unary_union(buffers)
-        masks.append(SiteMask(pair_identifier=str(row["Pair Identifier"]), geometry=geometry))
+        masks.append(SiteMask(pair_identifier=pair_id, geometry=geometry))
     return masks
 
 

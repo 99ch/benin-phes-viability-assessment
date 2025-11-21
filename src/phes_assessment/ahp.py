@@ -127,6 +127,18 @@ def compute_ahp_scores(
     hydrology = hydrology_df.copy()
     hydrology.columns = [col.strip() for col in hydrology.columns]
 
+    required_site_cols = {"Pair Identifier", "Class", "Energy (GWh)", "Storage time (h)"}
+    missing_site_cols = required_site_cols - set(sites.columns)
+    if missing_site_cols:
+        raise ValueError(
+            "Le catalogue de sites ne contient pas les colonnes requises: "
+            + ", ".join(sorted(missing_site_cols))
+        )
+
+    for column in ("Class", "Energy (GWh)", "Storage time (h)"):
+        if sites[column].isna().any():
+            raise ValueError(f"La colonne '{column}' contient des valeurs manquantes nécessaires au calcul AHP.")
+
     merged = sites.merge(
         hydrology,
         left_on="Pair Identifier",
