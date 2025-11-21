@@ -1,21 +1,24 @@
 """Modèle hydrologique stochastique pour les 12 sites PHES identifiés.
 
-Le module applique un bilan hydrique mensuel simple basé sur les séries
-climatiques agrégées (CHIRPS/ERA5) et simule des coefficients de ruissellement,
-pertes par infiltration, évapotranspiration et fuites linéaires via des lois
-aléatoires (Beta/Normal/Uniform). L'objectif est d'estimer la distribution du
-volume net annuel et la probabilité d'autonomie hydrique (>0) pour chaque site.
+Le module applique un bilan hydrique mensuel physiquement cohérent basé sur les
+séries climatiques agrégées (CHIRPS/ERA5) et simule des coefficients de 
+ruissellement, infiltration, évapotranspiration et fuites via des lois aléatoires.
 
-Hypothèses principales :
-- Les précipitations sont converties en mètres puis en volume à partir de
-  l'emprise (ha) des réservoirs upper + lower.
-- Les coefficients de ruissellement et d'infiltration sont tirés par mois et par
-  simulation (500-5000 tirages typiques).
-- L'évaporation potentielle ERA5 est appliquée via un multiplicateur normal
-  (±10 %) pour représenter les incertitudes locales.
-- Des fuites linéaires (0.05-0.2 % du volume) sont soustraites mensuellement.
-- On suit l'évolution du stock (borné entre 0 et la capacité GL) et on calcule
-  des indicateurs annuels/saisonniers.
+Hypothèses physiques (v2 - séparation apports/pertes) :
+- Les PRÉCIPITATIONS sur le bassin versant génèrent du RUISSELLEMENT qui arrive
+  naturellement au réservoir INFÉRIEUR (collecte passive par gravité).
+- L'ÉVAPORATION s'applique uniquement sur les SURFACES D'EAU des réservoirs
+  upper et lower (et non sur tout le bassin versant).
+- L'INFILTRATION réduit le ruissellement disponible dans le bassin versant avant
+  qu'il n'atteigne le réservoir inférieur.
+- Les FUITES linéaires (0.05-0.2 % du stock/mois) représentent les pertes
+  structurelles (liner, fondations).
+- Le stock global (borné entre 0 et capacité) agrège les deux réservoirs avec
+  échanges par pompage/turbinage selon les besoins énergétiques.
+  
+Cette approche sépare physiquement :
+  • Apports : bassin versant (km²) × précip × coeff_ruissellement → Lower
+  • Pertes : surfaces réservoirs (ha) × ETP × multiplicateur → Upper + Lower
 """
 from __future__ import annotations
 
@@ -31,26 +34,42 @@ from .sites import load_sites
 
 GL_IN_M3 = 1_000_000.0
 HA_IN_M2 = 10_000.0
-DRY_MONTHS = {11, 12, 1, 2, 3}
+MM_TO_M = 0.001
+DRY_MONTHS = {11, 12, 1, 2, 3, 4}
 
 
 @dataclass
 class SiteHydrologyParams:
     pair_identifier: str
     capacity_gl: float
-    area_ha: float
-    slope_percent: float
-    head_m: float
-    basin_area_km2: float | None = None
+    area_ha: float  # Surface totale des réservoirs (upper + lower)
+    upper_area_ha: float = 0.0  # Surface du réservoir supérieur
+    lower_area_ha: float = 0.0  # Surface du réservoir inférieur
+    slope_percent: float = 0.0
+    head_m: float = 0.0
+    basin_area_km2: float | None = None  # Bassin versant calculé (site-basins)
 
     @property
     def reservoir_area_m2(self) -> float:
+        """Surface totale des réservoirs en m² (pour compatibilité)."""
         return self.area_ha * HA_IN_M2
 
     @property
+    def upper_area_m2(self) -> float:
+        """Surface du réservoir supérieur en m²."""
+        return self.upper_area_ha * HA_IN_M2
+
+    @property
+    def lower_area_m2(self) -> float:
+        """Surface du réservoir inférieur en m²."""
+        return self.lower_area_ha * HA_IN_M2
+
+    @property
     def catchment_area_m2(self) -> float:
+        """Surface du bassin versant en m² (apports par ruissellement)."""
         if self.basin_area_km2 and self.basin_area_km2 > 0:
             return self.basin_area_km2 * 1_000_000.0
+        # Fallback : si pas de bassin, utiliser surface réservoirs
         return self.reservoir_area_m2
 
 
@@ -114,6 +133,8 @@ def load_site_parameters(
             pair_identifier=pair_id,
             capacity_gl=max(capacity, 1.0),
             area_ha=total_area,
+            upper_area_ha=upper_area,
+            lower_area_ha=lower_area,
             slope_percent=float(row.get("Slope (%)", 0) or 0),
             head_m=float(row.get("Head (m)", 0) or 0),
             basin_area_km2=basin_area_km2,
@@ -140,13 +161,10 @@ def load_climate_series(climate_path: Path) -> pd.DataFrame:
     return df
 
 
-def _to_meters(series: pd.Series) -> np.ndarray:
-    values = series.fillna(0).astype(float).to_numpy()
-    max_abs = np.nanmax(np.abs(values)) if len(values) else 0.0
-    if max_abs > 10:
-        # Valeurs en millimètres -> convertir en mètres
-        return values / 1000.0
-    return values
+def _mm_to_meters(series: pd.Series) -> np.ndarray:
+    """Convertir explicitement une série en millimètres vers des mètres."""
+
+    return series.fillna(0).astype(float).to_numpy() * MM_TO_M
 
 
 def _scale_beta(rng: np.random.Generator, shape: Tuple[int, ...], low: float, high: float, alpha: float, beta: float) -> np.ndarray:
@@ -187,14 +205,22 @@ def simulate_site(
     if df_site.empty:
         raise ValueError(f"Aucune série climatique pour {site.pair_identifier}")
 
-    precip_m = _to_meters(df_site["precip_mm"])
-    etp_m = np.abs(_to_meters(df_site["etp_mm"]))
+    precip_m = _mm_to_meters(df_site["precip_mm"])
+    etp_m = np.abs(_mm_to_meters(df_site["etp_mm"]))
     dates = df_site["date"].to_numpy()
 
-    basin_area_m2 = site.catchment_area_m2
-    reservoir_area_m2 = site.reservoir_area_m2
-    precip_gl = (precip_m * basin_area_m2) / GL_IN_M3
-    etp_gl = (etp_m * reservoir_area_m2) / GL_IN_M3
+    # Séparation physique : apports du bassin versant vs pertes sur réservoirs
+    catchment_area_m2 = site.catchment_area_m2  # Bassin versant (ruissellement)
+    upper_area_m2 = site.upper_area_m2  # Surface d'eau upper (évaporation)
+    lower_area_m2 = site.lower_area_m2  # Surface d'eau lower (évaporation)
+    
+    # Apports : précipitations sur bassin → ruissellement vers lower
+    precip_catchment_gl = (precip_m * catchment_area_m2) / GL_IN_M3
+    
+    # Pertes : évaporation sur surfaces d'eau uniquement
+    etp_upper_gl = (etp_m * upper_area_m2) / GL_IN_M3
+    etp_lower_gl = (etp_m * lower_area_m2) / GL_IN_M3
+    etp_total_gl = etp_upper_gl + etp_lower_gl
 
     n_months = len(df_site)
     n_sim = config.iterations
@@ -221,9 +247,14 @@ def simulate_site(
     evap_multiplier = np.clip(rng.normal(config.evap_mean, config.evap_std, size=(n_sim, n_months)), config.evap_bounds[0], config.evap_bounds[1])
     leakage_fraction = rng.uniform(config.leakage_fraction[0], config.leakage_fraction[1], size=(n_sim, n_months))
 
-    runoff_gl = runoff * precip_gl
-    infiltration_gl = infiltration * precip_gl
-    evap_gl = evap_multiplier * etp_gl
+    # Calcul des flux : apports - pertes
+    # APPORTS : ruissellement du bassin versant (après infiltration) → Lower
+    runoff_gl = runoff * precip_catchment_gl
+    infiltration_gl = infiltration * precip_catchment_gl
+    net_runoff_gl = runoff_gl - infiltration_gl  # Ruissellement net arrivant au Lower
+    
+    # PERTES : évaporation sur surfaces d'eau (upper + lower)
+    evap_gl = evap_multiplier * etp_total_gl
 
     initial_storage = site.capacity_gl * config.initial_storage_fraction
     storage = np.full(n_sim, initial_storage)
@@ -232,7 +263,8 @@ def simulate_site(
     storage_history = np.zeros((n_sim, n_months))
 
     for idx in range(n_months):
-        net = runoff_gl[:, idx] - infiltration_gl[:, idx] - evap_gl[:, idx]
+        # Bilan mensuel : apports (ruissellement net) - pertes (évap + fuites)
+        net = net_runoff_gl[:, idx] - evap_gl[:, idx]
         leakage_gl = leakage_fraction[:, idx] * storage
         net = net - leakage_gl
         monthly_balance[:, idx] = net

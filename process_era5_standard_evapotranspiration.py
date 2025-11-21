@@ -1,403 +1,229 @@
-#!/usr/bin/env python3#!/usr/bin/env python3
+#!/usr/bin/env python3
+"""Télécharge et convertit les rasters ERA5 (évapotranspiration potentielle).
 
-"""Pipeline de traitement ERA5 → GeoTIFF multi-bandes (ETP standardisée)."""Traitement ERA5/CHIRPS standard (version harmonisée).
+Le script s'appuie sur l'API Copernicus (cdsapi) pour récupérer la variable
+`potential_evaporation` du jeu de données
+`reanalysis-era5-single-levels-monthly-means`, puis génère des GeoTIFF
+annuels (12 bandes) compatibles avec `phes_assessment.cli climate-series`.
 
+Utilisation type :
 
+```
+python process_era5_standard_evapotranspiration.py \
+    --start-year 2002 --end-year 2023 \
+    --output-dir data/era5 \
+    --cache-dir data/era5_raw \
+    --north 12.8 --south 6.0 --west -1.5 --east 3.5
+```
 
-Ce script fournit deux commandes complémentaires :Ce script conserve le point d'entrée historique mais délègue désormais
+Assurez-vous d'avoir créé `~/.cdsapirc` avec vos identifiants Copernicus.
+"""
+from __future__ import annotations
 
-entièrement au module `phes_assessment.climate` afin d'éviter tout
-
-- ``download`` : télécharge les champs horaires ERA5 (single levels) via l'APIéchantillonnage « pixel unique » et garantir une cohérence parfaite avec
-
-  Copernicus CDS pour la zone d'étude et la période choisie ;les commandes CLI (`phes-data climate-series`).
-
-- ``convert`` : convertit un NetCDF ERA5 (ou un dossier de NetCDF) en GeoTIFF"""
-
-  annuel compatible avec ``phes_assessment.climate`` (12 bandes mensuelles,from __future__ import annotations
-
-  unités en millimètres).
-
+import math
 from pathlib import Path
+from typing import Dict, Optional
 
-L'objectif est de garantir une reproductibilité parfaite des rastersfrom typing import Optional
-
-``data/era5/era5_YYYY.tif`` utilisés par ``phes-data climate-series``.
-
+import numpy as np
 import pandas as pd
-
-Exemples d'usage :import typer
-
+import rasterio
+from rasterio.transform import from_origin
+import typer
+import xarray as xr
 from rich.console import Console
+from rich.progress import track
+from rich.table import Table
 
-.. code-block:: bashfrom rich.table import Table
+from phes_assessment.config import get_paths
+
+try:  # pragma: no cover - dépendance optionnelle
+    import cdsapi
+except ImportError:  # pragma: no cover
+    cdsapi = None  # type: ignore[assignment]
 
 
+app = typer.Typer(help="Télécharge et convertit les séries ERA5 (évapotranspiration)")
+console = Console()
 
-    # 1) Télécharger les fichiers NetCDF horaires pour 2020-2023from phes_assessment.climate import aggregate_series, export_series
+DATASET = "reanalysis-era5-single-levels-monthly-means"
+VARIABLE = "potential_evaporation"
 
-    python process_era5_standard_evapotranspiration.py download \from phes_assessment.config import get_paths
 
-        --start-year 2020 --end-year 2023 \
-
-        --north 12.5 --west 0.0 --south 9.0 --east 3.0 \DEFAULT_SITES = "n10_e001_12_sites_complete.csv"
-
-        --output-dir data/era5/raw
-
-app = typer.Typer(help="Génère les séries climatiques ERA5/CHIRPS via les utilitaires officiels")
-
-    # 2) Convertir chaque NetCDF en GeoTIFF multi-bandes (mm/mois)console = Console()
-
-    python process_era5_standard_evapotranspiration.py convert \
-
-        --source data/era5/raw/era5_2020.nc \
-
-        --output data/era5/era5_2020.tif@app.command()
-
+@app.command()
 def main(
+    root: Optional[Path] = typer.Option(None, "--root", help="Chemin vers la racine du dépôt"),
+    output_dir: Optional[Path] = typer.Option(None, help="Dossier cible des GeoTIFF annuels"),
+    cache_dir: Optional[Path] = typer.Option(Path("data/era5_raw"), help="Dossier cache des NetCDF téléchargés"),
+    start_year: int = typer.Option(2002, help="Première année à traiter", show_default=True),
+    end_year: int = typer.Option(2023, help="Dernière année à traiter", show_default=True),
+    north: float = typer.Option(12.8, help="Latitude nord de l'emprise (degrés)"),
+    south: float = typer.Option(6.0, help="Latitude sud de l'emprise (degrés)"),
+    west: float = typer.Option(-1.5, help="Longitude ouest de l'emprise (degrés)"),
+    east: float = typer.Option(3.5, help="Longitude est de l'emprise (degrés)"),
+    grid: float = typer.Option(0.25, help="Pas de grille (°)", show_default=True),
+    skip_download: bool = typer.Option(False, help="Ne pas télécharger si les NetCDF existent"),
+    force: bool = typer.Option(False, help="Forcer le re-téléchargement même si le NetCDF est présent"),
+) -> None:
+    """Télécharge les NetCDF ERA5 puis génère des GeoTIFF par année."""
 
-    # 3) Conversion en lot d'un dossier complet    root: Optional[Path] = typer.Option(None, "--root", help="Chemin vers la racine du dépôt"),
-
-    python process_era5_standard_evapotranspiration.py convert \    sites_csv: Optional[Path] = typer.Option(None, "--sites", help="CSV des sites (défaut: data/n10_e001_12_sites_complete.csv)"),
-
-        --source data/era5/raw \    basins: Optional[Path] = typer.Option(None, "--basins", help="GeoJSON des bassins versants"),
-
-        --output-dir data/era5    output: Path = typer.Option(Path("results/site_stats_era5_standard.parquet"), help="Fichier de sortie (csv/parquet)"),
-
-    start_year: Optional[int] = typer.Option(2002, help="Année de début (None = tout l'historique)", show_default=True),
-
-Les valeurs ERA5 de ``potential_evaporation`` sont fournies en mètres et    end_year: Optional[int] = typer.Option(2023, help="Année de fin (None = tout l'historique)", show_default=True),
-
-négatives (flux sortant). Nous appliquons donc par défaut un facteur ``-1000``    buffer_meters: float = typer.Option(500.0, help="Rayon des buffers lorsqu'aucun bassin n'est fourni", show_default=True),
-
-(pour obtenir des millimètres positifs) puis un agrégat ``sum`` par mois.    geometry_mode: str = typer.Option(
-
-"""        "auto",
-
-from __future__ import annotations        help="auto = basins si disponible, sinon buffers ; on peut forcer 'basins' ou 'buffers'",
-
-        show_default=True,
-
-import sys    ),
-
-from dataclasses import dataclass) -> None:
-
-from pathlib import Path    """Produit des séries climatiques cohérentes avec le pipeline principal."""
-
-from typing import Iterable, Optional
+    if start_year > end_year:
+        raise typer.BadParameter("start-year doit être ≤ end-year.")
+    if north <= south:
+        raise typer.BadParameter("north doit être strictement supérieur à south.")
+    if east <= west:
+        raise typer.BadParameter("east doit être strictement supérieur à west.")
+    if grid <= 0:
+        raise typer.BadParameter("grid doit être strictement positif.")
 
     paths = get_paths(root)
-
-import numpy as np    csv_path = _resolve_path(paths.data_dir / DEFAULT_SITES, sites_csv, paths.root)
-
-import pandas as pd    basins_path = _resolve_path(None, basins, paths.root) if basins else None
-
-import rasterio
-
-import typer    start_date = pd.Timestamp(start_year, 1, 1) if start_year else None
-
-import xarray as xr    end_date = pd.Timestamp(end_year, 12, 31) if end_year else None
-
-from rasterio.transform import from_origin
-
-from rich.console import Console    df = aggregate_series(
-
-from rich.table import Table        paths,
-
-        csv_path,
-
-try:  # pragma: no cover - dépendance optionnelle        dataset="both",
-
-    import cdsapi        buffer_meters=buffer_meters,
-
-except ImportError:  # pragma: no cover        basins_geojson=basins_path,
-
-    cdsapi = None  # type: ignore[assignment]        start_date=start_date.date() if start_date is not None else None,
-
-        end_date=end_date.date() if end_date is not None else None,
-
-console = Console()        geometry_mode=geometry_mode,
-
-app = typer.Typer(help="Téléchargement et conversion ERA5 (ETP) pour le workflow PHES")    )
-
-
-
-    export_path = export_series(
-
-def _ensure_directory(path: Path) -> None:        _resolve_path(Path("results/site_stats_era5_standard.parquet"), output, paths.root),
-
-    path.mkdir(parents=True, exist_ok=True)        paths,
-
-        csv_path,
-
-        dataset="both",
-
-def _hours() -> list[str]:        buffer_meters=buffer_meters,
-
-    return [f"{hour:02d}:00" for hour in range(24)]        basins_geojson=basins_path,
-
-        geometry_mode=geometry_mode,
-
-        dataframe=df,
-
-def _months() -> list[str]:    )
-
-    return [f"{month:02d}" for month in range(1, 13)]
-
-    console.print(f"Séries sauvegardées dans {export_path}")
-
-    _print_summary(df)
-
-@dataclass
-
-class ConversionResult:
-
-    source: Pathdef _resolve_path(default: Path | None, candidate: Optional[Path], root: Path) -> Path:
-
-    output: Path    if candidate is None:
-
-    year: int        if default is None:
-
-    band_count: int            raise ValueError("Impossible de résoudre le chemin demandé")
-
-    precip_mm_mean: float        return default
-
-    etp_mm_mean: float    return candidate if candidate.is_absolute() else (root / candidate)
-
-
-
-
-
-@app.command("download")def _print_summary(df: pd.DataFrame) -> None:
-
-def download_era5(    if df.empty:
-
-    start_year: int = typer.Option(..., help="Première année incluse"),        console.print("[yellow]Aucune donnée générée : vérifier les rasters disponibles.[/yellow]")
-
-    end_year: int = typer.Option(..., help="Dernière année incluse"),        return
-
-    north: float = typer.Option(..., help="Latitude max (Nord)"),
-
-    west: float = typer.Option(..., help="Longitude Ouest"),    table = Table(title="Séries ERA5 + CHIRPS", header_style="bold cyan")
-
-    south: float = typer.Option(..., help="Latitude min (Sud)"),    table.add_column("Sites", justify="right")
-
-    east: float = typer.Option(..., help="Longitude Est"),    table.add_column("Période")
-
-    output_dir: Path = typer.Option(Path("data/era5/raw"), help="Répertoire des NetCDF téléchargés"),    table.add_column("Précip. moyenne (mm/mois)", justify="right")
-
-    variable: str = typer.Option("potential_evaporation", help="Variable ERA5 à récupérer"),    table.add_column("ETP moyenne (mm/mois)", justify="right")
-
-) -> None:
-
-    """Télécharge les champs ERA5 horaires via CDS (format NetCDF)."""    sites = df["pair_identifier"].nunique()
-
-    date_min = df["date"].min()
-
-    if cdsapi is None:    date_max = df["date"].max()
-
-        typer.echo("[!] Installez cdsapi (pip install cdsapi) et configurez ~/.cdsapirc avant de lancer le téléchargement.")    precip_mean = df["precip_mm"].mean()
-
-        raise typer.Exit(code=1)    etp_mean = df["etp_mm"].mean()
-
-
-
-    if end_year < start_year:    table.add_row(
-
-        raise typer.BadParameter("end-year doit être >= start-year")        str(sites),
-
-        f"{date_min:%Y-%m} → {date_max:%Y-%m}",
-
-    client = cdsapi.Client()  # type: ignore[call-arg]        f"{precip_mean:.1f}" if pd.notna(precip_mean) else "-",
-
-    _ensure_directory(output_dir)        f"{etp_mean:.1f}" if pd.notna(etp_mean) else "-",
-
-    )
-
-    for year in range(start_year, end_year + 1):    console.print(table)
-
-        target = output_dir / f"era5_{year}.nc"
-
-        if target.exists():
-
-            console.print(f"[green]Déjà présent : {target}")if __name__ == "__main__":
-
-            continue    app()
-        console.print(f"[cyan]Téléchargement ERA5 {year} → {target}")
-        client.retrieve(  # pragma: no cover - appel réseau
-            "reanalysis-era5-single-levels",
-            {
-                "product_type": "reanalysis",
-                "variable": variable,
-                "year": str(year),
-                "month": _months(),
-                "day": [f"{day:02d}" for day in range(1, 32)],
-                "time": _hours(),
-                "area": [north, west, south, east],
-                "format": "netcdf",
-            },
-            str(target),
-        )
-
-
-@app.command("convert")
-def convert_netcdf(
-    source: Path = typer.Option(..., help="Fichier NetCDF ERA5 ou dossier contenant des .nc"),
-    output: Optional[Path] = typer.Option(None, help="Chemin du GeoTIFF cible (si source unique)"),
-    output_dir: Path = typer.Option(Path("data/era5"), help="Dossier des GeoTIFF générés (si conversion par lot)"),
-    variable: str = typer.Option("potential_evaporation", help="Nom de la variable dans le NetCDF"),
-    aggregation: str = typer.Option("sum", help="Agrégation mensuelle: sum ou mean"),
-    multiplier: float = typer.Option(-1000.0, help="Facteur multiplicatif appliqué après agrégation"),
-    offset: float = typer.Option(0.0, help="Décalage ajouté après multiplication"),
-) -> None:
-    """Convertit un ou plusieurs NetCDF ERA5 en GeoTIFF multi-bandes."""
-
-    sources: Iterable[Path]
-    if source.is_dir():
-        sources = sorted(p for p in source.iterdir() if p.suffix.lower() in {".nc", ".nc4"})
-        if not sources:
-            raise typer.BadParameter(f"Aucun fichier NetCDF trouvé dans {source}")
-        _ensure_directory(output_dir)
-    else:
-        sources = [source]
-        if output is None:
-            _ensure_directory(output_dir)
-
-    summaries: list[ConversionResult] = []
-    for netcdf_path in sources:
-        result = _convert_single(
-            netcdf_path,
-            variable=variable,
-            aggregation=aggregation,
-            multiplier=multiplier,
-            offset=offset,
-            explicit_output=output if source.is_file() and output else None,
-            default_output_dir=output_dir,
-        )
-        summaries.append(result)
-        console.print(
-            f"[green]✔ GeoTIFF {result.output.name} – {result.band_count} bandes, année {result.year}"
-        )
-
-    _print_summary_table(summaries)
-
-
-def _convert_single(
-    netcdf_path: Path,
-    *,
-    variable: str,
-    aggregation: str,
-    multiplier: float,
-    offset: float,
-    explicit_output: Path | None,
-    default_output_dir: Path,
-) -> ConversionResult:
+    era5_dir = (paths.data_dir / "era5") if output_dir is None else _resolve(paths.root, output_dir)
+    cache_path = _resolve(paths.root, cache_dir) if cache_dir else (paths.root / "data/era5_raw")
+    era5_dir.mkdir(parents=True, exist_ok=True)
+    cache_path.mkdir(parents=True, exist_ok=True)
+
+    download_client = None
+    if not skip_download:
+        if cdsapi is None:
+            raise typer.BadParameter(
+                "cdsapi non installé. Exécutez `pip install cdsapi` ou fournissez --skip-download si les NetCDF existent."
+            )
+        download_client = cdsapi.Client()
+
+    summary: Dict[int, Dict[str, float]] = {}
+    area = [north, west, south, east]
+    years = range(start_year, end_year + 1)
+
+    for year in track(years, description="Traitement ERA5"):
+        nc_path = cache_path / f"era5_potential_evaporation_{year}.nc"
+        tif_path = era5_dir / f"era5_{year}.tif"
+
+        if not skip_download and (force or not nc_path.exists()):
+            console.print(f"Téléchargement ERA5 {year}…")
+            _download_year(download_client, year, area, grid, nc_path)
+        elif not nc_path.exists():
+            raise typer.BadParameter(
+                f"NetCDF manquant pour {year}: {nc_path}. Désactivez --skip-download ou placez le fichier manuellement."
+            )
+
+        stats = _netcdf_to_geotiff(nc_path, tif_path)
+        summary[year] = stats
+
+    _print_summary(summary, era5_dir)
+
+
+def _resolve(root: Path, candidate: Path) -> Path:
+    return candidate if candidate.is_absolute() else (root / candidate)
+
+
+def _download_year(client: cdsapi.Client, year: int, area: list[float], grid: float, target: Path) -> None:  # type: ignore[name-defined]
+    request = {
+        "product_type": "monthly_averaged_reanalysis",
+        "variable": VARIABLE,
+        "year": str(year),
+        "month": [f"{m:02d}" for m in range(1, 13)],
+        "time": "00:00",
+        "format": "netcdf",
+        "area": area,
+        "grid": [grid, grid],
+    }
+    client.retrieve(DATASET, request, str(target))
+
+
+def _netcdf_to_geotiff(netcdf_path: Path, output_path: Path) -> Dict[str, float]:
     ds = xr.open_dataset(netcdf_path)
-    if variable not in ds:
-        raise typer.BadParameter(f"La variable '{variable}' est absente de {netcdf_path.name}")
-    data = ds[variable]
-    if "time" not in data.dims:
-        raise typer.BadParameter(f"La variable '{variable}' ne possède pas de dimension temporelle")
+    try:
+        data = _extract_variable(ds)
+        times = pd.to_datetime(data["time"].values)
+        arr = np.asarray(data, dtype=np.float32)
+        lat = data["latitude"].values
+        lon = data["longitude"].values
 
-    data = data.sortby("time")
-    time_index = pd.to_datetime(data["time"].values)
-    unique_years = np.unique(time_index.year)
-    if unique_years.size != 1:
-        raise typer.BadParameter(
-            f"Le fichier {netcdf_path.name} couvre plusieurs années ({unique_years}). "
-            "Générez un fichier par année avant conversion."
-        )
-    year = int(unique_years[0])
+        arr, lat = _ensure_descending_lat(arr, lat)
+        arr, lon = _ensure_ascending_lon(arr, lon)
 
-    if aggregation == "sum":
-        monthly = data.resample(time="MS").sum()
-    elif aggregation == "mean":
-        monthly = data.resample(time="MS").mean()
-    else:
-        raise typer.BadParameter("aggregation doit valoir 'sum' ou 'mean'")
+        # ERA5 PEV est exprimée en mètres d'eau (flux vers le bas = valeurs négatives).
+        # Les moyennes mensuelles sont déjà intégrées sur le mois : on ne fait qu'une conversion mètres → mm
+        # et on inverse le signe pour exprimer des pertes positives.
+        arr_mm = arr * -1000.0
 
-    monthly = (monthly * multiplier) + offset
-    monthly = monthly.transpose("time", "latitude", "longitude")
+        lat_res = abs(lat[1] - lat[0]) if len(lat) > 1 else 0.25
+        lon_res = abs(lon[1] - lon[0]) if len(lon) > 1 else 0.25
+        north = lat[0] + lat_res / 2
+        west = lon[0] - lon_res / 2
+        transform = from_origin(west, north, lon_res, lat_res)
 
-    latitudes = monthly["latitude"].values
-    longitudes = monthly["longitude"].values
+        profile = {
+            "driver": "GTiff",
+            "dtype": "float32",
+            "count": arr_mm.shape[0],
+            "height": arr_mm.shape[1],
+            "width": arr_mm.shape[2],
+            "transform": transform,
+            "crs": "EPSG:4326",
+            "compress": "deflate",
+        }
 
-    # Assurer un ordre décroissant en latitude pour correspondre à la convention GeoTIFF
-    if latitudes[0] < latitudes[-1]:
-        monthly = monthly.reindex(latitude=latitudes[::-1])
-        latitudes = monthly["latitude"].values
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        with rasterio.open(output_path, "w", **profile) as dst:
+            for idx in range(arr_mm.shape[0]):
+                dst.write(arr_mm[idx], idx + 1)
+                dst.set_band_description(idx + 1, f"{times[idx]:%Y-%m}")
+                dst.update_tags(
+                    idx + 1,
+                    units="mm/month",
+                    era5_variable=VARIABLE,
+                )
 
-    if latitudes.size < 2 or longitudes.size < 2:
-        raise typer.BadParameter("Le NetCDF doit contenir au moins deux pas de latitude et de longitude.")
-    y_res = float(abs(latitudes[1] - latitudes[0]))
-    x_res = float(abs(longitudes[1] - longitudes[0]))
-    transform = from_origin(float(longitudes.min()), float(latitudes.max()), x_res, y_res)
-
-    values = monthly.values.astype(np.float32)
-    band_count = values.shape[0]
-    if band_count != 12:
-        console.print(
-            f"[yellow]⚠ {netcdf_path.name} ne contient pas 12 mois (bandes = {band_count})."
-        )
-
-    output_path = explicit_output or (default_output_dir / f"era5_{year}.tif")
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-
-    with rasterio.open(
-        output_path,
-        "w",
-        driver="GTiff",
-        height=values.shape[1],
-        width=values.shape[2],
-        count=band_count,
-        dtype="float32",
-        crs="EPSG:4326",
-        transform=transform,
-        nodata=np.nan,
-        compress="lzw",
-    ) as dst:
-        timestamps = pd.to_datetime(monthly["time"].values)
-        for idx in range(band_count):
-            dst.write(values[idx], idx + 1)
-            month_label = f"{timestamps[idx].month:02d}"
-            dst.set_band_description(idx + 1, month_label)
-
-    precip_mean = float(np.nanmean(values))
-    return ConversionResult(
-        source=netcdf_path,
-        output=output_path,
-        year=year,
-        band_count=band_count,
-        precip_mm_mean=precip_mean,
-        etp_mm_mean=precip_mean,
-    )
+        return {
+            "months": float(arr_mm.shape[0]),
+            "mean_mm": float(np.nanmean(arr_mm)),
+            "time_start": float(times[0].value),
+            "time_end": float(times[-1].value),
+        }
+    finally:
+        ds.close()
 
 
-def _print_summary_table(results: list[ConversionResult]) -> None:
-    if not results:
-        return
-    table = Table(title="Conversion ERA5 → GeoTIFF", header_style="bold cyan")
-    table.add_column("Fichier NetCDF")
-    table.add_column("GeoTIFF")
+def _extract_variable(ds: xr.Dataset) -> xr.DataArray:
+    for candidate in ("pev", "potential_evaporation"):
+        if candidate in ds:
+            return ds[candidate]
+    raise ValueError("La variable potential_evaporation n'a pas été trouvée dans le NetCDF ERA5.")
+
+
+def _ensure_descending_lat(arr: np.ndarray, lat: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    if lat[0] < lat[-1]:
+        lat = lat[::-1]
+        arr = arr[:, ::-1, :]
+    return arr, lat
+
+
+def _ensure_ascending_lon(arr: np.ndarray, lon: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    if lon[0] > lon[-1]:
+        lon = lon[::-1]
+        arr = arr[:, :, ::-1]
+    return arr, lon
+def _print_summary(summary: Dict[int, Dict[str, float]], output_dir: Path) -> None:
+    table = Table(title="GeoTIFF ERA5 générés", header_style="bold green")
     table.add_column("Année", justify="right")
     table.add_column("Bandes", justify="right")
-    table.add_column("Moyenne (mm/mois)", justify="right")
-    for entry in results:
+    table.add_column("ETP moyenne (mm/mois)", justify="right")
+    table.add_column("Fichier")
+
+    for year in sorted(summary):
+        stats = summary[year]
         table.add_row(
-            entry.source.name,
-            entry.output.name,
-            str(entry.year),
-            str(entry.band_count),
-            f"{entry.precip_mm_mean:.1f}" if np.isfinite(entry.precip_mm_mean) else "-",
+            str(year),
+            f"{int(stats['months'])}",
+            f"{stats['mean_mm']:.1f}",
+            str(output_dir / f"era5_{year}.tif"),
         )
+
     console.print(table)
 
 
+if __name__ == "main__":  # pragma: no cover - garde historique
+    app()
+
 if __name__ == "__main__":
-    try:
-        app()
-    except typer.Exit:
-        raise
-    except Exception as exc:  # pragma: no cover - utilisation CLI
-        console.print(f"[red]Erreur : {exc}")
-        sys.exit(1)
+    app()

@@ -117,7 +117,7 @@ Pour un workflow **CHIRPS seul** ou **ERA5 seul** (cas de diagnostics incrément
 1. Lancez d'abord `climate-series --dataset chirps --output results/chirps_only.parquet --basins results/site_basins.geojson` afin de générer `precip_mm`.
 2. Lancez ensuite `climate-series --dataset era5 --output results/era5_only.parquet --basins results/site_basins.geojson` pour obtenir `etp_mm`.
 3. Fusionnez les deux fichiers sur `pair_identifier` + `date` (ex. via `pandas.merge`). Le
-  fichier combiné doit contenir les deux colonnes pour alimenter `hydro-sim`.
+   fichier combiné doit contenir les deux colonnes pour alimenter `hydro-sim`.
 
 La sortie est écrite au format demandé : `.parquet` si un moteur
 (`pyarrow`/`fastparquet`) est disponible, sinon CSV. Par défaut, le fichier
@@ -251,13 +251,13 @@ final pour audit ou intégration dans une matrice multicritère plus large.
 
 #### Références scientifiques des paramètres
 
-| Paramètre | Valeur par défaut | Source / justification |
-| --- | --- | --- |
-| Coefficient de ruissellement (`runoff_min`–`runoff_max`) | 0,30 → 0,80 | Descroix et al. (2010) documentent le « paradoxe sahélien » et des pics de ruissellement pouvant atteindre 0,8 dans les bassins béninois ; aligné sur les observations régionales Donga/Koupendri. |
-| Coefficient d’infiltration (`infiltration_min`–`infiltration_max`) | 0,05 → 0,25 | Mesures de Kamagaté et al. (2007) (5–24 % d’infiltration directe) complétées par Azuka & Igué (2020) sur la variabilité inter-sites. |
-| Stock initial (`initial_storage_fraction`) | 60 % de la capacité | Recommandation PNNL (Pracheil et al., 2025) pour les études préliminaires PHES fermés afin de couvrir la saison sèche de départ. |
-| Multiplicateur ETP (`evap_mean`, `evap_std`, `evap_min`, `evap_max`) | 1,0 ± 0,1 borné à [0,5 ; 1,5] | Incertitude locale sur ERA5 (Hersbach et al., 2020) + marges utilisées par Simon et al. (2023) dans les ACV PHES. |
-| Fuites linéaires (`leakage_min`–`leakage_max`) | 0,05 → 0,20 % du stock / mois | Fourchette tirée des évaluations DOE/PNNL (Pracheil et al., 2025 ; Simon et al., 2023) sur les pertes structures béton/liner. |
+| Paramètre                                                            | Valeur par défaut             | Source / justification                                                                                                                                                                             |
+| -------------------------------------------------------------------- | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Coefficient de ruissellement (`runoff_min`–`runoff_max`)             | 0,30 → 0,80                   | Descroix et al. (2010) documentent le « paradoxe sahélien » et des pics de ruissellement pouvant atteindre 0,8 dans les bassins béninois ; aligné sur les observations régionales Donga/Koupendri. |
+| Coefficient d’infiltration (`infiltration_min`–`infiltration_max`)   | 0,05 → 0,25                   | Mesures de Kamagaté et al. (2007) (5–24 % d’infiltration directe) complétées par Azuka & Igué (2020) sur la variabilité inter-sites.                                                               |
+| Stock initial (`initial_storage_fraction`)                           | 60 % de la capacité           | Recommandation PNNL (Pracheil et al., 2025) pour les études préliminaires PHES fermés afin de couvrir la saison sèche de départ.                                                                   |
+| Multiplicateur ETP (`evap_mean`, `evap_std`, `evap_min`, `evap_max`) | 1,0 ± 0,1 borné à [0,5 ; 1,5] | Incertitude locale sur ERA5 (Hersbach et al., 2020) + marges utilisées par Simon et al. (2023) dans les ACV PHES.                                                                                  |
+| Fuites linéaires (`leakage_min`–`leakage_max`)                       | 0,05 → 0,20 % du stock / mois | Fourchette tirée des évaluations DOE/PNNL (Pracheil et al., 2025 ; Simon et al., 2023) sur les pertes structures béton/liner.                                                                      |
 
 Ces sources sont détaillées dans `docs/methodology.md` et les références RDF associées (`Close_loop_Ben.rdf`).
 
@@ -308,16 +308,20 @@ Conseils pratiques :
 ### Pipeline complet (ordre recommandé)
 
 1. **Préparer les rasters climatiques**
+
    - ERA5 : `python process_era5_standard_evapotranspiration.py --start-year 2002 --end-year 2023 --output-dir data/era5` (requiert `cdsapi` + `~/.cdsapirc`).
-   - CHIRPS : décompresser tous les `.tif.gz` dans `data/chirps/` (voir section QA ci-dessous).
+   - CHIRPS : les fichiers `.tif` doivent être décompressés dans `data/chirps/`. Si vous avez des fichiers `.tif.gz`, utilisez :
 
      ```bash
-     for f in data/chirps/*.tif.gz*; do
-       gunzip -f "$f"
-     done
+     gunzip -f data/chirps/*.tif.gz
      ```
 
-     (Adapter la commande si les fichiers proviennent d’une archive `*.tif.gz.1`.)
+     Pour nettoyer les fichiers résiduels (`.gz.1`, `.gz.2`, etc.) :
+
+     ```bash
+     rm -f data/chirps/*.gz*
+     ```
+
 2. **Dériver les bassins** : `python -m phes_assessment.cli site-basins --output results/site_basins.geojson` (WhiteboxTools requis).
 3. **Agrégations climatiques** : `python -m phes_assessment.cli climate-series --dataset both --basins results/site_basins.geojson --output results/climate_series.parquet` (répéter par sous-période si besoin).
 4. **Simulation hydrologique** : `python -m phes_assessment.cli hydro-sim --climate results/climate_series.parquet --basins results/site_basins.geojson --output results/hydrology_summary.parquet`.
