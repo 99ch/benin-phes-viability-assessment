@@ -1,6 +1,8 @@
 """Tests unitaires sur le module hydrologique."""
 from __future__ import annotations
 
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -9,6 +11,7 @@ from phes_assessment.hydrology import (
     HydrologyModelConfig,
     SiteHydrologyParams,
     _scale_beta,
+    load_climate_series,
     run_hydrology_simulation_from_data,
     simulate_site,
 )
@@ -27,7 +30,13 @@ def _dummy_site(pair: str = "SITE_A", basin_km2: float | None = None) -> SiteHyd
     )
 
 
-def _climate_series(pair: str, start: str, periods: int, precip_mm: float = 120.0, etp_mm: float = 40.0) -> pd.DataFrame:
+def _climate_series(
+    pair: str,
+    start: str,
+    periods: int,
+    precip_mm: float = 120.0,
+    etp_mm: float = 40.0,
+) -> pd.DataFrame:
     dates = pd.date_range(start=start, periods=periods, freq="MS")
     return pd.DataFrame(
         {
@@ -39,16 +48,26 @@ def _climate_series(pair: str, start: str, periods: int, precip_mm: float = 120.
     )
 
 
+def test_load_climate_series_raises_on_nan(tmp_path: Path) -> None:
+    df = _climate_series("SITE_NAN", "2002-01-01", 12)
+    df.loc[3, "precip_mm"] = np.nan
+    csv_path = tmp_path / "climate.csv"
+    df.to_csv(csv_path, index=False)
+    with pytest.raises(ValueError, match="precip_mm"):
+        load_climate_series(csv_path)
+
+
 def test_runoff_and_infiltration_respect_mass_conservation() -> None:
     """runoff + infiltration ne dépasse jamais 100 % de la lame d'eau."""
 
     rng = np.random.default_rng(1234)
     shape = (512, 24)
-    runoff = _scale_beta(rng, shape, 0.3, 0.8, 3.5, 4.0)
-    infiltration_potential = _scale_beta(rng, shape, 0.05, 0.25, 2.0, 5.0)
-    available_fraction = np.clip(1.0 - runoff, 0.0, 1.0)
-    infiltration = np.minimum(infiltration_potential, available_fraction)
-    assert np.all(runoff + infiltration <= 1.0 + 1e-9)
+    infiltration_fraction = _scale_beta(rng, shape, 0.05, 0.25, 2.0, 5.0)
+    infiltration_fraction = np.clip(infiltration_fraction, 0.0, 1.0)
+    available_fraction = np.clip(1.0 - infiltration_fraction, 0.0, 1.0)
+    runoff_raw = _scale_beta(rng, shape, 0.3, 0.8, 3.5, 4.0)
+    runoff = np.minimum(runoff_raw, available_fraction)
+    assert np.all(runoff + infiltration_fraction <= 1.0 + 1e-9)
 
 
 def test_dry_season_metrics_stable_with_repeated_years() -> None:
@@ -133,7 +152,9 @@ def test_physical_separation_inflows_vs_losses() -> None:
     monthly_precip_m3 = 0.1 * basin_area_m2  # 100 mm sur 10 km²
     monthly_runoff_m3 = 0.5 * monthly_precip_m3  # 50% ruissellement
     monthly_infiltration_m3 = 0.1 * monthly_precip_m3  # 10% infiltration
-    monthly_net_runoff_m3 = monthly_runoff_m3 - monthly_infiltration_m3
+    available_fraction = 1.0 - (monthly_infiltration_m3 / monthly_precip_m3)
+    net_runoff_fraction = min(0.5, available_fraction)
+    monthly_net_runoff_m3 = net_runoff_fraction * monthly_precip_m3
 
     monthly_etp_m3 = 0.05 * reservoir_area_m2  # 50 mm sur 1 km² (réservoirs)
 
@@ -147,3 +168,24 @@ def test_physical_separation_inflows_vs_losses() -> None:
     # Le bilan doit être POSITIF car bassin versant >> réservoirs
     assert result.median_annual_balance_gl > 0
     assert result.prob_positive_annual_balance > 0.9
+
+
+def test_dry_season_probability_detects_midseason_failure() -> None:
+    site = _dummy_site("SITE_DRYFAIL")
+    config = HydrologyModelConfig(
+        iterations=64,
+        seed=123,
+        runoff_range=(0.0, 0.0),
+        infiltration_range=(0.0, 0.0),
+        evap_mean=1.0,
+        evap_std=0.0,
+        evap_bounds=(1.0, 1.0),
+        leakage_fraction=(0.0, 0.0),
+    )
+
+    # Aucun apport pendant la saison sèche et une ETP gigantesque qui vide le stock.
+    climate = _climate_series("SITE_DRYFAIL", "2002-11-01", 12, precip_mm=0.0, etp_mm=10000.0)
+    result = simulate_site(site, climate, config)
+
+    assert result.dry_season_prob_positive == 0.0
+    assert result.dry_season_p90_deficit_gl > 0

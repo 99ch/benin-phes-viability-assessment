@@ -15,14 +15,6 @@ CLASS_MULTIPLIERS: dict[str, float] = {
     "D": 1.75,
     "E": 2.00,
 }
-BASE_COST_PER_MW_USD = 530_000  # $/MW pour la classe A
-BASE_COST_PER_MWH_USD = 47_000  # $/MWh pour la classe A
-FIXED_OM_PER_MW_PER_YEAR = 8_210.0
-VARIABLE_OM_PER_MWH = 0.30
-DEFAULT_CYCLES_PER_YEAR = 300
-DEFAULT_LIFETIME_YEARS = 60
-DEFAULT_DISCOUNT_RATE = 0.05
-DEFAULT_ROUND_TRIP_EFFICIENCY = 0.81
 
 
 @dataclass(frozen=True)
@@ -65,55 +57,11 @@ def _normalize_series(series: pd.Series, *, higher_is_better: bool) -> pd.Series
     return result
 
 
-def _safe_divide(numerator: float, denominator: float) -> float:
-    if denominator in (0, 0.0):
-        return float("nan")
-    return numerator / denominator
-
-
-def estimate_lcos(
-    power_mw: float,
-    energy_mwh: float,
-    cost_per_mw_usd: float,
-    cost_per_mwh_usd: float,
-    *,
-    cycles_per_year: int = DEFAULT_CYCLES_PER_YEAR,
-    lifetime_years: int = DEFAULT_LIFETIME_YEARS,
-    discount_rate: float = DEFAULT_DISCOUNT_RATE,
-    round_trip_efficiency: float = DEFAULT_ROUND_TRIP_EFFICIENCY,
-    fixed_om_per_mw: float = FIXED_OM_PER_MW_PER_YEAR,
-    variable_om_per_mwh: float = VARIABLE_OM_PER_MWH,
-) -> float:
-    """Calcule le LCOS simplifié pour un site donné."""
-
-    if power_mw <= 0 or energy_mwh <= 0:
-        return float("nan")
-
-    capex = cost_per_mw_usd * power_mw + cost_per_mwh_usd * energy_mwh
-    annual_energy = energy_mwh * cycles_per_year * round_trip_efficiency
-    if annual_energy <= 0:
-        return float("nan")
-
-    annual_fixed_om = fixed_om_per_mw * power_mw
-    annual_variable_om = variable_om_per_mwh * annual_energy
-
-    r = discount_rate
-    n = lifetime_years
-    crf = r * (1 + r) ** n / ((1 + r) ** n - 1)
-    annualized_capex = capex * crf
-
-    return (annualized_capex + annual_fixed_om + annual_variable_om) / annual_energy
-
-
 def compute_ahp_scores(
     sites_df: pd.DataFrame,
     hydrology_df: pd.DataFrame,
     *,
     weights: AHPWeights | None = None,
-    cycles_per_year: int = DEFAULT_CYCLES_PER_YEAR,
-    lifetime_years: int = DEFAULT_LIFETIME_YEARS,
-    discount_rate: float = DEFAULT_DISCOUNT_RATE,
-    round_trip_efficiency: float = DEFAULT_ROUND_TRIP_EFFICIENCY,
 ) -> pd.DataFrame:
     """Fusionne les données sites/hydrologie et calcule les scores AHP."""
 
@@ -127,7 +75,7 @@ def compute_ahp_scores(
     hydrology = hydrology_df.copy()
     hydrology.columns = [col.strip() for col in hydrology.columns]
 
-    required_site_cols = {"Pair Identifier", "Class", "Energy (GWh)", "Storage time (h)"}
+    required_site_cols = {"Pair Identifier", "Class"}
     missing_site_cols = required_site_cols - set(sites.columns)
     if missing_site_cols:
         raise ValueError(
@@ -135,9 +83,8 @@ def compute_ahp_scores(
             + ", ".join(sorted(missing_site_cols))
         )
 
-    for column in ("Class", "Energy (GWh)", "Storage time (h)"):
-        if sites[column].isna().any():
-            raise ValueError(f"La colonne '{column}' contient des valeurs manquantes nécessaires au calcul AHP.")
+    if sites["Class"].isna().any():
+        raise ValueError("La colonne 'Class' contient des valeurs manquantes nécessaires au calcul AHP.")
 
     merged = sites.merge(
         hydrology,
@@ -153,34 +100,7 @@ def compute_ahp_scores(
         missing = merged.loc[merged["class_multiplier"].isna(), "class"].unique()
         raise ValueError(f"Classes économiques inconnues: {missing}")
 
-    merged["energy_capacity_mwh"] = merged["Energy (GWh)"].astype(float) * 1_000.0
-    merged["storage_hours"] = merged["Storage time (h)"].astype(float)
-    merged["power_rating_mw"] = merged.apply(
-        lambda row: _safe_divide(row["energy_capacity_mwh"], row["storage_hours"]),
-        axis=1,
-    )
-
-    merged["cost_per_mw_usd"] = BASE_COST_PER_MW_USD * merged["class_multiplier"]
-    merged["cost_per_mwh_usd"] = BASE_COST_PER_MWH_USD * merged["class_multiplier"]
-    merged["capex_total_usd"] = (
-        merged["cost_per_mw_usd"] * merged["power_rating_mw"].fillna(0)
-        + merged["cost_per_mwh_usd"] * merged["energy_capacity_mwh"].fillna(0)
-    )
-    merged["lcos_usd_per_mwh"] = merged.apply(
-        lambda row: estimate_lcos(
-            power_mw=row["power_rating_mw"],
-            energy_mwh=row["energy_capacity_mwh"],
-            cost_per_mw_usd=row["cost_per_mw_usd"],
-            cost_per_mwh_usd=row["cost_per_mwh_usd"],
-            cycles_per_year=cycles_per_year,
-            lifetime_years=lifetime_years,
-            discount_rate=discount_rate,
-            round_trip_efficiency=round_trip_efficiency,
-        ),
-        axis=1,
-    )
-
-    merged["economic_score"] = _normalize_series(merged["lcos_usd_per_mwh"], higher_is_better=False)
+    merged["economic_score"] = _normalize_series(merged["class_multiplier"], higher_is_better=False)
 
     prob_positive = merged["prob_positive_annual_balance"].astype(float)
     dry_prob = merged["dry_season_prob_positive"].astype(float).fillna(prob_positive)
@@ -212,7 +132,6 @@ def compute_ahp_scores(
     merged["rank"] = merged["final_score"].rank(ascending=False, method="dense").astype(int)
     merged.sort_values(["final_score", "pair_identifier"], ascending=[False, True], inplace=True)
     merged.reset_index(drop=True, inplace=True)
-    merged["capex_musd"] = merged["capex_total_usd"] / 1_000_000
 
     return merged[
         [
@@ -223,10 +142,6 @@ def compute_ahp_scores(
             "economic_score",
             "hydrology_score",
             "infrastructure_score",
-            "lcos_usd_per_mwh",
-            "capex_musd",
-            "power_rating_mw",
-            "energy_capacity_mwh",
             "prob_positive_annual_balance",
             "dry_season_prob_positive",
         ]

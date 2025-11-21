@@ -20,7 +20,6 @@ Assurez-vous d'avoir créé `~/.cdsapirc` avec vos identifiants Copernicus.
 """
 from __future__ import annotations
 
-import math
 from pathlib import Path
 from typing import Dict, Optional
 
@@ -141,10 +140,10 @@ def _netcdf_to_geotiff(netcdf_path: Path, output_path: Path) -> Dict[str, float]
         arr, lat = _ensure_descending_lat(arr, lat)
         arr, lon = _ensure_ascending_lon(arr, lon)
 
-        # ERA5 PEV est exprimée en mètres d'eau (flux vers le bas = valeurs négatives).
-        # Les moyennes mensuelles sont déjà intégrées sur le mois : on ne fait qu'une conversion mètres → mm
-        # et on inverse le signe pour exprimer des pertes positives.
-        arr_mm = arr * -1000.0
+        # ERA5 « monthly averaged reanalysis » fournit des moyennes journalières (m/jour)
+        # déjà intégrées sur 24 h. On convertit donc en mm/mois via : |arr| × nb_jours × 1000.
+        days_in_month = np.array([ts.days_in_month for ts in times], dtype=np.float32)
+        arr_mm = np.abs(arr) * days_in_month[:, None, None] * 1000.0
 
         lat_res = abs(lat[1] - lat[0]) if len(lat) > 1 else 0.25
         lon_res = abs(lon[1] - lon[0]) if len(lon) > 1 else 0.25
@@ -203,6 +202,8 @@ def _ensure_ascending_lon(arr: np.ndarray, lon: np.ndarray) -> tuple[np.ndarray,
         lon = lon[::-1]
         arr = arr[:, :, ::-1]
     return arr, lon
+
+
 def _print_summary(summary: Dict[int, Dict[str, float]], output_dir: Path) -> None:
     table = Table(title="GeoTIFF ERA5 générés", header_style="bold green")
     table.add_column("Année", justify="right")
@@ -220,10 +221,6 @@ def _print_summary(summary: Dict[int, Dict[str, float]], output_dir: Path) -> No
         )
 
     console.print(table)
-
-
-if __name__ == "main__":  # pragma: no cover - garde historique
-    app()
 
 if __name__ == "__main__":
     app()

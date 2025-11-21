@@ -212,6 +212,11 @@ def climate_series(
     end_date = date(end_year, 12, 31) if end_year else None
     progress_callback = None
     basins_path = _resolve_path(paths.root, basins)
+    if basins_path is None:
+        raise typer.BadParameter(
+            "climate-series requiert désormais un GeoJSON de bassins. Fournissez --basins." ,
+            param_hint="--basins",
+        )
     csv_path = _resolve_path(paths.root, sites_csv) if sites_csv else None
 
     def _build_progress_callback(progress: Progress, tasks: dict[str, int]):
@@ -552,11 +557,7 @@ def ahp_rank(
     economic_weight: float = typer.Option(0.4, help="Poids du critère économique", show_default=True),
     hydrology_weight: float = typer.Option(0.4, help="Poids du critère hydrologique", show_default=True),
     infrastructure_weight: float = typer.Option(0.2, help="Poids du critère infrastructure", show_default=True),
-    cycles_per_year: int = typer.Option(300, help="Cycles équivalents par an", show_default=True),
-    lifetime_years: int = typer.Option(60, help="Durée de vie (années)", show_default=True),
-    discount_rate: float = typer.Option(0.05, help="Taux d'actualisation", show_default=True),
-    round_trip_efficiency: float = typer.Option(0.81, help="Efficacité cycle", show_default=True),
-    weights_config: Optional[Path] = typer.Option(None, "--weights-config", help="JSON/YAML définissant les poids AHP et/ou les paramètres LCOS"),
+    weights_config: Optional[Path] = typer.Option(None, "--weights-config", help="JSON/YAML définissant uniquement les poids AHP"),
 ) -> None:
     """Classe les sites via un AHP simplifié reliant classe économique et hydrologie."""
 
@@ -570,10 +571,6 @@ def ahp_rank(
         "economic_weight": economic_weight,
         "hydrology_weight": hydrology_weight,
         "infrastructure_weight": infrastructure_weight,
-        "cycles_per_year": float(cycles_per_year),
-        "lifetime_years": float(lifetime_years),
-        "discount_rate": discount_rate,
-        "round_trip_efficiency": round_trip_efficiency,
     }
 
     if weights_config:
@@ -596,10 +593,6 @@ def ahp_rank(
         sites_df,
         hydro_df,
         weights=weights,
-        cycles_per_year=int(config_values["cycles_per_year"]),
-        lifetime_years=int(config_values["lifetime_years"]),
-        discount_rate=float(config_values["discount_rate"]),
-        round_trip_efficiency=float(config_values["round_trip_efficiency"]),
     )
 
     table = Table(title="Classement AHP", header_style="bold green")
@@ -609,7 +602,6 @@ def ahp_rank(
     table.add_column("Score", justify="right")
     table.add_column("Score éco", justify="right")
     table.add_column("Score hydro", justify="right")
-    table.add_column("LCOS ($/MWh)", justify="right")
     table.add_column("Prob annuelle", justify="right")
     table.add_column("Prob saison sèche", justify="right")
 
@@ -621,7 +613,6 @@ def ahp_rank(
             f"{row['final_score']:.3f}",
             f"{row['economic_score']:.3f}" if not math.isnan(row["economic_score"]) else "-",
             f"{row['hydrology_score']:.3f}" if not math.isnan(row["hydrology_score"]) else "-",
-            f"{row['lcos_usd_per_mwh']:.1f}" if not math.isnan(row["lcos_usd_per_mwh"]) else "-",
             f"{row['prob_positive_annual_balance']:.2f}" if not math.isnan(row["prob_positive_annual_balance"]) else "-",
             f"{row['dry_season_prob_positive']:.2f}" if not math.isnan(row["dry_season_prob_positive"]) else "-",
         )

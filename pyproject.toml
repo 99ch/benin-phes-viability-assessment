@@ -4,7 +4,21 @@ version = "0.1.0"
 description = "Outils de traitement et d'analyse pour l'étude de faisabilité PHES au Bénin"
 authors = [{name = "99ch"}]
 readme = "README.md"
+license = {text = "MIT"}
 requires-python = ">=3.10"
+keywords = ["PHES", "pumped-hydro", "energy-storage", "hydrology", "Benin", "renewable-energy", "Monte-Carlo", "AHP"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Hydrology",
+    "Topic :: Scientific/Engineering :: GIS",
+]
 dependencies = [
     "rasterio>=1.3",
     "xarray>=2024.1",
@@ -30,6 +44,12 @@ full = [
 dev = [
     "pytest>=8.2",
 ]
+
+[project.urls]
+Homepage = "https://github.com/99ch/benin-phes-viability-assessment"
+Repository = "https://github.com/99ch/benin-phes-viability-assessment"
+Issues = "https://github.com/99ch/benin-phes-viability-assessment/issues"
+Documentation = "https://github.com/99ch/benin-phes-viability-assessment/blob/phes/README.md"
 
 [project.scripts]
 phes-data = "phes_assessment.cli:data_catalog"

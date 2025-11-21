@@ -158,6 +158,16 @@ def load_climate_series(climate_path: Path) -> pd.DataFrame:
         )
     df["date"] = pd.to_datetime(df["date"])  # type: ignore[assignment]
     df.sort_values(["pair_identifier", "date"], inplace=True)
+    missing_mask = df[["precip_mm", "etp_mm"]].isna().any(axis=1)
+    if missing_mask.any():
+        faulty = df[missing_mask].head(5)
+        details = ", ".join(
+            f"{row['pair_identifier']}@{row['date']:%Y-%m}" for _, row in faulty.iterrows()
+        )
+        raise ValueError(
+            "Les séries climatiques contiennent des valeurs manquantes pour precip_mm ou etp_mm : "
+            f"{details} (total {missing_mask.sum()} enregistrements)."
+        )
     return df
 
 
@@ -226,6 +236,16 @@ def simulate_site(
     n_sim = config.iterations
     rng = rng or np.random.default_rng(config.seed)
 
+    infiltration_fraction = _scale_beta(
+        rng,
+        (n_sim, n_months),
+        config.infiltration_range[0],
+        config.infiltration_range[1],
+        config.infiltration_alpha,
+        config.infiltration_beta,
+    )
+    infiltration_fraction = np.clip(infiltration_fraction, 0.0, 1.0)
+    available_fraction = np.clip(1.0 - infiltration_fraction, 0.0, 1.0)
     runoff = _scale_beta(
         rng,
         (n_sim, n_months),
@@ -234,24 +254,15 @@ def simulate_site(
         config.runoff_alpha,
         config.runoff_beta,
     )
-    infiltration_potential = _scale_beta(
-        rng,
-        (n_sim, n_months),
-        config.infiltration_range[0],
-        config.infiltration_range[1],
-        config.infiltration_alpha,
-        config.infiltration_beta,
-    )
-    available_fraction = np.clip(1.0 - runoff, 0.0, 1.0)
-    infiltration = np.minimum(infiltration_potential, available_fraction)
+    runoff = np.minimum(runoff, available_fraction)
     evap_multiplier = np.clip(rng.normal(config.evap_mean, config.evap_std, size=(n_sim, n_months)), config.evap_bounds[0], config.evap_bounds[1])
     leakage_fraction = rng.uniform(config.leakage_fraction[0], config.leakage_fraction[1], size=(n_sim, n_months))
 
     # Calcul des flux : apports - pertes
     # APPORTS : ruissellement du bassin versant (après infiltration) → Lower
+    infiltration_gl = infiltration_fraction * precip_catchment_gl
     runoff_gl = runoff * precip_catchment_gl
-    infiltration_gl = infiltration * precip_catchment_gl
-    net_runoff_gl = runoff_gl - infiltration_gl  # Ruissellement net arrivant au Lower
+    net_runoff_gl = runoff_gl  # infiltration a déjà été retirée de la lame disponible
     
     # PERTES : évaporation sur surfaces d'eau (upper + lower)
     evap_gl = evap_multiplier * etp_total_gl
@@ -283,25 +294,35 @@ def simulate_site(
     dry_groups = _dry_season_groups(dates)
     if dry_groups:
         dry_balance_list: List[np.ndarray] = []
-        dry_net_with_storage: List[np.ndarray] = []
         dry_deficits_list: List[np.ndarray] = []
+        dry_safe_list: List[np.ndarray] = []
         for indices in dry_groups.values():
             balances = monthly_balance[:, indices].sum(axis=1)
+            dry_balance_list.append(balances)
+
             first_idx = int(indices[0])
             if first_idx > 0:
                 entering_storage = storage_history[:, first_idx - 1]
             else:
                 entering_storage = np.full(n_sim, initial_storage)
-            net = balances + entering_storage
-            dry_balance_list.append(balances)
-            dry_net_with_storage.append(net)
-            dry_deficits_list.append(np.clip(-net, 0.0, None))
+
+            temp_storage = entering_storage.copy()
+            season_min = temp_storage.copy()
+            season_safe = temp_storage > 0
+            for idx in indices:
+                temp_storage = temp_storage + monthly_balance[:, idx]
+                season_min = np.minimum(season_min, temp_storage)
+                temp_storage = np.clip(temp_storage, 0.0, site.capacity_gl)
+                season_safe &= temp_storage > 0
+
+            dry_safe_list.append(season_safe)
+            dry_deficits_list.append(np.maximum(0.0, -season_min))
 
         combined_balances = np.concatenate(dry_balance_list, axis=0)
-        combined_net = np.concatenate(dry_net_with_storage, axis=0)
         combined_deficits = np.concatenate(dry_deficits_list, axis=0)
+        combined_safe = np.concatenate(dry_safe_list, axis=0)
 
-        dry_prob_positive = float((combined_net > 0).mean())
+        dry_prob_positive = float(combined_safe.mean())
         dry_p10 = float(np.percentile(combined_balances, 10))
         dry_median = float(np.median(combined_balances))
         dry_median_deficit = float(np.median(combined_deficits))

@@ -1,8 +1,11 @@
 # Étude de faisabilité des systèmes PHES en boucle fermée – Bénin
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+
 Ce dépôt regroupe les données et scripts nécessaires pour évaluer la faisabilité technique,
 économique et hydrologique de sites PHES (Pumped Hydro Energy Storage) identifiés dans
-la région de l’Atacora.
+la région de l'Atacora.
 
 ## Objectifs du projet
 
@@ -78,14 +81,17 @@ enrichi des altitudes dans un CSV.
 
 ```bash
 # période complète 2002-2023, sortie CSV par défaut
-python -m phes_assessment.cli climate-series --output results/climate_series.csv
-
-# exemple : ERA5 uniquement sur 2008-2010 avec buffers de 1.5 km
 python -m phes_assessment.cli climate-series \
-    --dataset era5 \
-    --start-year 2008 --end-year 2010 \
-    --buffer-meters 1500 \
-    --output results/era5_2008_2010.parquet
+  --basins results/site_basins.geojson \
+  --output results/climate_series.csv
+
+# exemple : ERA5 uniquement sur 2008-2010 avec buffers de 1.5 km (rayon ignoré car --basins)
+python -m phes_assessment.cli climate-series \
+  --dataset era5 \
+  --start-year 2008 --end-year 2010 \
+  --buffer-meters 1500 \
+  --basins results/site_basins.geojson \
+  --output results/era5_2008_2010.parquet
 ```
 
 La commande :
@@ -98,6 +104,8 @@ La commande :
   qui tombent dans la fenêtre temporelle demandée et calcule la moyenne spatiale
   à l’intérieur de chaque polygone (progress bar Rich affichée pendant le traitement) ;
 - exporte un tableau `pair_identifier × date` avec les colonnes `precip_mm` et `etp_mm`.
+- échoue explicitement si un mois manque (NaN) dans les séries agrégées afin d’éviter
+  toute extrapolation implicite.
 
 Paramètres principaux :
 
@@ -149,6 +157,11 @@ de 0,25° et une métadonnée par bande (`YYYY-MM`). Pour « convertir uniqueme
 des NetCDF déjà téléchargés, ajoutez `--skip-download` et placez vos fichiers
 dans le dossier indiqué par `--cache-dir`.
 
+> ℹ️ Les champs ERA5 « monthly averaged reanalysis » renvoient des flux moyens
+> journaliers en mètres d’eau par jour. Le script convertit donc les valeurs en
+> **mm/mois** via `abs(pev) × nb_jours × 1000`, ce qui correspond aux gammes
+> attendues (50‑200 mm/mois sur l’Atacora).
+
 ### Contrôler la complétude des datasets
 
 La commande `data-qa` exécute un diagnostic rapide sur les dossiers CHIRPS, ERA5
@@ -176,19 +189,22 @@ P90 du déficit → volume d’appoint nécessaire).
 
 ```bash
 python -m phes_assessment.cli hydro-sim \
-	--climate results/climate_series.csv \
-  --iterations 10000 \
-	--output results/hydrology_summary.parquet
+  --climate results/climate_series.csv \
+    --basins results/site_basins.geojson \
+    --iterations 10000 \
+  --output results/hydrology_summary.parquet
 ```
 
 Ajoutez `--basins results/site_basins.geojson` pour que le modèle utilise les aires
 contributives issues de `site-basins` au lieu des surfaces des réservoirs.
 
 La table affiche, pour chaque site, la médiane/p10/p90 annuels, la probabilité
-que le stock reste positif, la probabilité de survivre à la saison sèche, la
+que le stock reste positif, la probabilité que le stock reste **strictement
+positif chaque mois** pendant la saison sèche (trajectoire intra-saison), la
 **médiane du bilan saison sèche** et le **P90 du déficit saison sèche** (volume
-d’appoint à prévoir). L’export `parquet` est automatique grâce à `pyarrow` (et
-tombe en CSV seulement en cas d’exception).
+d’appoint à prévoir calculé à partir du minimum de stock atteint). L’export
+`parquet` est automatique grâce à `pyarrow` (et tombe en CSV seulement en cas
+d’exception).
 
 #### Analyse de sensibilité globale (Sobol/Morris)
 
@@ -202,12 +218,12 @@ alimenter les analyses de robustesse.
 ### Classer les sites via l’AHP
 
 Les classes économiques (A → E) fournies par `n10_e001_12_sites_complete.csv`
-reprennent la méthodologie de Stocks et al. (2021) : coût unitaire `Classe A`
-= 530 000 $/MW et 47 000 $/MWh, puis majoration par pas de 25 % jusqu’à la
-classe E (×2). La commande `ahp-rank` combine ces coûts avec les diagnostics
-hydrologiques issus de `hydro-sim` et quelques indicateurs d’infrastructure
-(head, séparation, pente, ratio eau/roche) pour produire un classement AHP
-pondéré.
+reprennent la méthodologie de Stocks et al. (2021) : la classe A est la plus
+attractive (coûts spécifiques faibles), la classe E la plus onéreuse. La
+commande `ahp-rank` utilise **directement** cette hiérarchie A→E comme critère
+économique (pas de recalcul LCOS) et la combine avec les diagnostics
+hydrologiques issus de `hydro-sim` ainsi que quelques indicateurs
+d’infrastructure (head, séparation, pente, ratio eau/roche).
 
 ```bash
 python -m phes_assessment.cli ahp-rank \
@@ -216,17 +232,14 @@ python -m phes_assessment.cli ahp-rank \
     --economic-weight 0.45 --hydrology-weight 0.4 --infrastructure-weight 0.15
 ```
 
-Il est possible de définir ces paramètres (ainsi que `cycles_per_year`, `lifetime_years`,
-`discount_rate`, `round_trip_efficiency`) dans un fichier JSON/YAML et de les injecter via
-`--weights-config` :
+Il est possible de définir ces poids dans un fichier JSON/YAML et de les
+injecter via `--weights-config` :
 
 ```json
 {
   "economic_weight": 0.5,
   "hydrology_weight": 0.35,
-  "infrastructure_weight": 0.15,
-  "cycles_per_year": 320,
-  "discount_rate": 0.045
+  "infrastructure_weight": 0.15
 }
 ```
 
@@ -238,16 +251,15 @@ python -m phes_assessment.cli ahp-rank \
 
 Sous le capot :
 
-- les coûts par MW/MWh sont annualisés sur 60 ans (taux 5 %, 300 cycles/an,
-  rendement 81 %) pour calculer un LCOS simplifié (hypothèses Stocks et al.
-  2021 + Lopez et al. 2024), normalisé comme critère économique ;
+- le critère économique correspond à la classe A→E (ordre croissant des
+  multiplicateurs Stocks et al., 2021) ;
 - les probabilités `prob_positive_annual_balance` et
   `dry_season_prob_positive` servent au critère hydrologique ;
 - `Head (m)`, `Separation (km)`, `Slope (%)` et `Combined water to rock ratio`
   fournissent un score d’infrastructure.
 
-L’export (CSV ou Parquet) contient les sous-scores, le LCOS estimé et le rang
-final pour audit ou intégration dans une matrice multicritère plus large.
+L’export (CSV ou Parquet) contient les sous-scores et le rang final pour audit
+ou intégration dans une matrice multicritère plus large.
 
 #### Références scientifiques des paramètres
 

@@ -23,3 +23,12 @@ Thumbs.db
 
 # Artefacts de packaging
 *.egg-info/
+
+# Résultats générés (conserver un exemple, ignorer le reste)
+/results/*
+!/results/.gitkeep
+
+# Documentation interne
+ARTICLE_COMPLET_FR.docx
+ARTICLE_COMPLET_FR.md
+Close_loop_Ben.rdf

@@ -131,9 +131,18 @@ def _mean_valid(values: Iterable[float]) -> float:
     return float(np.mean(arr))
 
 
+YEAR_MONTH_PATTERN = re.compile(r"(?:19|20)\d{2}[^0-9]?([01]\d)")
+SINGLE_MONTH_PATTERN = re.compile(r"\b(0?[1-9]|1[0-2])\b")
+
+
 def _infer_month(description: str | None, band_index: int) -> int:
     if description:
-        match = re.search(r"(\d{1,2})", description)
+        match = YEAR_MONTH_PATTERN.search(description)
+        if match:
+            month = int(match.group(1))
+            if 1 <= month <= 12:
+                return month
+        match = SINGLE_MONTH_PATTERN.search(description)
         if match:
             month = int(match.group(1))
             if 1 <= month <= 12:
