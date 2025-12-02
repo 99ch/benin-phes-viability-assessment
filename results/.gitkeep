@@ -1,0 +1,12 @@
+# Ce dossier contient les résultats des analyses PHES
+
+Les fichiers générés par le pipeline (`climate-series`, `hydro-sim`, `ahp-rank`, etc.) sont placés ici.
+
+## Fichiers typiques
+
+- `site_basins.geojson` : Bassins versants délimités
+- `climate_series.parquet` : Séries climatiques agrégées
+- `hydrology_summary.parquet` : Résultats simulation Monte Carlo
+- `ahp_rankings.parquet` : Classement final des sites
+
+Ces fichiers sont ignorés par git (voir `.gitignore`).
