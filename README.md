@@ -40,6 +40,8 @@ pip install -e .
 pip install -e .[full]
 ```
 
+> ℹ️ `SALib` est installé par défaut via `pip install -e .` car requis pour `hydro-sim --sensitivity-*`. En revanche **WhiteboxTools** n’est fourni que par l’extra `[full]` : installez-le avant d’exécuter `site-basins`, `climate-series` ou `hydro-sim`, sans quoi ces commandes échoueront faute de GeoJSON de bassins.
+
 ## Premier outil disponible
 
 Le module `phes-data` (alias `phes_assessment.cli`) inventorie les jeux de
@@ -96,12 +98,11 @@ python -m phes_assessment.cli climate-series \
 
 La commande :
 
-- construit automatiquement des **buffers circulaires** (rayon configurable, 500 m par défaut)
-  autour des réservoirs upper/lower décrits dans le CSV, fusionne les polygones
-  par paire et applique systématiquement un paramètre `all_touched` pour s’assurer
-  que les pixels de bord sont intégrés ;
+- consomme **obligatoirement** un GeoJSON de bassins (`--basins`) généré par `site-basins`
+  et applique `all_touched=True` pour englober les pixels de bord (le paramètre
+  `--buffer-meters` est ignoré dès qu’un bassin est fourni) ;
 - parcourt uniquement les rasters CHIRPS (précipitations) et/ou ERA5 (évapotranspiration)
-  qui tombent dans la fenêtre temporelle demandée et calcule la moyenne spatiale
+  compris dans la fenêtre temporelle demandée et calcule la moyenne spatiale
   à l’intérieur de chaque polygone (progress bar Rich affichée pendant le traitement) ;
 - exporte un tableau `pair_identifier × date` avec les colonnes `precip_mm` et `etp_mm`.
 - échoue explicitement si un mois manque (NaN) dans les séries agrégées afin d’éviter
@@ -215,6 +216,16 @@ choix (`median_balance`, `prob_positive`, `dry_median_balance`,
 `dry_p90_deficit`). Un fichier `*_sensitivity.parquet` (ou CSV) est produit pour
 alimenter les analyses de robustesse.
 
+```bash
+python -m phes_assessment.cli hydro-sim \
+  --climate results/climate_series.csv \
+  --basins results/site_basins.geojson \
+  --iterations 10000 --seed 42 \
+  --sensitivity-method sobol \
+  --sensitivity-output results/hydrology_sensitivity.parquet \
+  --sensitivity-metric median_balance
+```
+
 ### Classer les sites via l’AHP
 
 Les classes économiques (A → E) fournies par `n10_e001_12_sites_complete.csv`
@@ -258,8 +269,47 @@ Sous le capot :
 - `Head (m)`, `Separation (km)`, `Slope (%)` et `Combined water to rock ratio`
   fournissent un score d’infrastructure.
 
-L’export (CSV ou Parquet) contient les sous-scores et le rang final pour audit
+L'export (CSV ou Parquet) contient les sous-scores et le rang final pour audit
 ou intégration dans une matrice multicritère plus large.
+
+### Générer les figures de l'article
+
+La commande `article-figures` produit l'ensemble des graphiques cités dans le manuscrit
+(flowchart algorithme, cycles climatiques, poids AHP, comparaison Monte Carlo, heatmap)
+au format PNG haute résolution (300 dpi).
+
+```bash
+python -m phes_assessment.cli article-figures \
+  --climate results/climate_series.csv \
+  --summary results/hydrology_summary.parquet \
+  --ahp-rankings results/ahp_rankings.parquet \
+  --figure-dir results/figures \
+  --deterministic results/hydrology_deterministic_reference.csv
+```
+
+Options notables :
+
+- `--deterministic` : fichier CSV/Parquet contenant les bilans déterministes (médiane
+  annuelle et P10 saison sèche) pour générer la **Figure 7b** (diagramme en barres).
+  Si omis, cette figure utilise directement `hydrology_summary.parquet`.
+- `--figure7-pair` : identifiant du site utilisé pour le cycle climatique local (par
+  défaut `n10_e001_RES31412 & n10_e001_RES31520`).
+
+Fichiers produits dans `results/figures/` :
+
+- `figure01_algorithme.png` : flowchart d'identification des sites PHES.
+- `figure02_cycle_climatique.png` : cycle saisonnier moyen national (CHIRPS+ERA5).
+- `figure03_ahp_poids.png` : poids des critères principaux et sous-critères AHP.
+- `figure07_cycle_site_res31412.png` : cycle climatique local du site de référence.
+- `figure07b_bilan_deterministe.png` : diagramme en barres comparant médiane annuelle
+  et déficit saison sèche (P10) pour chaque site.
+- `figure08_monte_carlo.png` : distributions P10-P90 des bilans annuels.
+- `figure09_ahp_heatmap.png` : heatmap des scores AHP et sous-critères normalisés
+  (16×9 in, typographie agrandie pour export DOCX/PDF).
+
+Ces fichiers sont directement utilisés dans `ARTICLE_COMPLET_FR.md` via des références
+Markdown et peuvent être mis à jour en relançant la commande après tout changement
+de données ou de paramètres.
 
 #### Références scientifiques des paramètres
 
@@ -341,6 +391,44 @@ Conseils pratiques :
 
 Chaque étape est traçable via `docs/methodology.md`, et les fichiers générés dans `results/`
 permettent de documenter la reproductibilité du pipeline.
+
+## Artefacts publiés (`results/`)
+
+Les sorties suivantes sont déjà incluses dans le dépôt pour faciliter la revue et la
+reproduction :
+
+- `results/site_basins.geojson` : bassins versants dérivés de FABDEM/WhiteboxTools (marge 15 km).
+- `results/site_masks.geojson` : buffers circulaires de 500 m (référence cartographique).
+- `results/climate_series.csv` : séries CHIRPS+ERA5 agrégées (2002‑2023) sur les bassins.
+- `results/hydrology_summary.parquet` (+ `.csv`) : synthèse Monte Carlo 10k tirages (seed 42, exécution du 23 novembre 2025) avec
+  les métriques annuelles et saison sèche conservant explicitement la masse (`dry_season_prob_positive`, `dry_season_prob_storage_positive`).
+  Les médianes actualisées s’échelonnent de -14,02 à +4,63 GL/an (médiane globale = -0,23 GL) et seuls
+  quatre sites dépassent 50 % de probabilité de bilan annuel positif.
+- `results/hydrology_sensitivity.parquet` et `results/hydrology_summary_sobol.parquet` :
+  indices SALib (Sobol/Morris) utilisés dans la Section 3.3 de l’article. Les nouveaux indices Saltelli montrent
+  que le ruissellement explique ≈81 % de la variance annuelle, les fuites ≈14 %, l’infiltration ≈5 % et
+  l’évapotranspiration <0,1 %, ce qui oriente directement les campagnes de mesures terrain.
+- `results/ahp_rankings.parquet` : classement pondéré des 12 sites (poids par défaut 0.4/0.3/0.2/0.1).
+- `results/hydrology_deterministic_reference.csv` : extraction des médianes annuelles et
+  déficits P10 saison sèche utilisés pour la Figure 7b (référence déterministe).
+- `results/figures/*.png` : graphiques haute résolution (300 dpi) générés par `article-figures`
+  et intégrés dans le manuscrit (flowchart, cycles climatiques, heatmap AHP, distributions Monte Carlo).
+
+Chaque fichier est régénérable en suivant la séquence ci-dessus. Les reviewers peuvent
+ainsi confronter directement les chiffres du manuscrit (Tables 3–4) aux exports fournis.
+
+### Instantané hydrologique (run du 23 novembre 2025)
+
+| Site prioritaire | Médiane annuelle (GL/an) | P(>0) (%) | P10 saison sèche (GL) |
+| ---------------- | ------------------------ | --------- | --------------------- |
+| RES18951         | +4,63                    | 100,0     | -1,63                 |
+| RES11634         | +3,29                    | 100,0     | -0,63                 |
+| RES35193         | +1,94                    | 100,0     | -0,68                 |
+| RES15127         | +1,65                    | 100,0     | -0,53                 |
+
+Les huit autres sites conservent des médianes négatives (−0,20 à −14,02 GL/an) et leur probabilité d’autonomie
+annuelle reste nulle. Tous les sites affichent `dry_season_prob_positive < 0,1 %`, ce qui implique d’intégrer les
+volumes d’appoint indiqués dans le tableau ci-dessus (voir aussi Tableau 4 de l’article) dans tout scénario opérationnel.
 
 ## Méthodologie et références scientifiques
 
