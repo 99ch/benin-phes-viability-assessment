@@ -8,6 +8,7 @@ import tempfile
 import warnings
 from collections import defaultdict
 from contextlib import contextmanager
+import calendar
 from datetime import date
 from pathlib import Path
 from typing import Callable, Dict, Iterable, Iterator, Tuple
@@ -205,6 +206,17 @@ def aggregate_series(
 
     records: Dict[Tuple[str, date], Dict[str, float]] = defaultdict(dict)
 
+    def _convert_etp_value(raw_value: float, dt_band: date) -> float:
+        if not np.isfinite(raw_value):
+            return float("nan")
+        value = abs(float(raw_value))
+        days = calendar.monthrange(dt_band.year, dt_band.month)[1]
+        if value > 50:
+            return value  # déjà en mm/mois
+        if value > 1:
+            return value * days  # mm/jour → mm/mois
+        return value * 1000.0 * days  # m/jour → mm/mois
+
     def _process_directory(
         directory: Path,
         value_key: str,
@@ -222,12 +234,6 @@ def aggregate_series(
                     warnings.warn(f"Nom de fichier ignoré (date introuvable): {raster_path.name}")
                     continue
                 year = dt.year
-                year_start = date(year, 1, 1)
-                year_end = date(year, 12, 1)
-                if start_date and year_end < start_date:
-                    continue
-                if end_date and year_start > end_date:
-                    continue
                 processed_file = False
                 try:
                     with _prepared_raster(raster_path) as prepared:
@@ -244,6 +250,11 @@ def aggregate_series(
                                     continue
                                 processed_file = True
                                 samples = _sample_dataset(dataset, geometries, band_index=band_index)
+                                if value_key == "etp_mm":
+                                    samples = {
+                                        pair: _convert_etp_value(val, dt_band)
+                                        for pair, val in samples.items()
+                                    }
                                 for pair, value in samples.items():
                                     records[(pair, dt_band)][value_key] = value
                 except (EOFError, OSError, gzip.BadGzipFile) as exc:

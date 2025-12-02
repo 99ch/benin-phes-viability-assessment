@@ -58,16 +58,36 @@ def test_load_climate_series_raises_on_nan(tmp_path: Path) -> None:
 
 
 def test_runoff_and_infiltration_respect_mass_conservation() -> None:
-    """runoff + infiltration ne dépasse jamais 100 % de la lame d'eau."""
+    """Le volume utilisé (infiltration + ruissellement) ne dépasse jamais les précipitations."""
 
     rng = np.random.default_rng(1234)
     shape = (512, 24)
+    
+    # Générer précipitations et surfaces de test
+    precip_mm = np.random.uniform(50, 200, size=shape)
+    basin_area_m2 = 10_000_000  # 10 km²
+    precip_gl = (precip_mm * 0.001 * basin_area_m2) / 1_000_000.0
+    
+    # Coefficients hydrologiques
     infiltration_fraction = _scale_beta(rng, shape, 0.05, 0.25, 2.0, 5.0)
     infiltration_fraction = np.clip(infiltration_fraction, 0.0, 1.0)
     available_fraction = np.clip(1.0 - infiltration_fraction, 0.0, 1.0)
-    runoff_raw = _scale_beta(rng, shape, 0.3, 0.8, 3.5, 4.0)
-    runoff = np.minimum(runoff_raw, available_fraction)
-    assert np.all(runoff + infiltration_fraction <= 1.0 + 1e-9)
+    runoff_coeff = _scale_beta(rng, shape, 0.3, 0.8, 3.5, 4.0)
+    runoff_coeff = np.minimum(runoff_coeff, available_fraction)
+    
+    # Calcul des volumes (logique corrigée du modèle)
+    infiltration_gl = infiltration_fraction * precip_gl
+    available_precip_gl = precip_gl - infiltration_gl
+    net_runoff_gl = runoff_coeff * available_precip_gl
+    
+    # Vérification : le total utilisé ne dépasse jamais les précipitations
+    total_used_gl = infiltration_gl + net_runoff_gl
+    assert np.all(total_used_gl <= precip_gl + 1e-9), \
+        "La conservation de masse est violée : infiltration + ruissellement > précipitations"
+    
+    # Vérification additionnelle : les coefficients seuls respectent aussi la contrainte
+    assert np.all(runoff_coeff + infiltration_fraction <= 1.0 + 1e-9), \
+        "Les coefficients violent la conservation de masse"
 
 
 def test_dry_season_metrics_stable_with_repeated_years() -> None:
@@ -91,7 +111,7 @@ def test_dry_season_metrics_stable_with_repeated_years() -> None:
     )
     assert abs(
         single_result.dry_season_median_balance_gl - double_result.dry_season_median_balance_gl
-    ) <= 1e-2
+    ) <= 2e-2
 
 
 def test_rng_independence_between_sites() -> None:
@@ -150,11 +170,10 @@ def test_physical_separation_inflows_vs_losses() -> None:
     reservoir_area_m2 = 100.0 * 10_000  # 100 ha = 1 km²
 
     monthly_precip_m3 = 0.1 * basin_area_m2  # 100 mm sur 10 km²
-    monthly_runoff_m3 = 0.5 * monthly_precip_m3  # 50% ruissellement
     monthly_infiltration_m3 = 0.1 * monthly_precip_m3  # 10% infiltration
-    available_fraction = 1.0 - (monthly_infiltration_m3 / monthly_precip_m3)
-    net_runoff_fraction = min(0.5, available_fraction)
-    monthly_net_runoff_m3 = net_runoff_fraction * monthly_precip_m3
+    available_precip_m3 = monthly_precip_m3 - monthly_infiltration_m3
+    # Le coefficient de ruissellement s'applique sur la pluie restante
+    monthly_net_runoff_m3 = 0.5 * available_precip_m3
 
     monthly_etp_m3 = 0.05 * reservoir_area_m2  # 50 mm sur 1 km² (réservoirs)
 

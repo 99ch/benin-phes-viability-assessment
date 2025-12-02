@@ -25,6 +25,7 @@ from .hydrology import (
     load_site_parameters,
     run_hydrology_simulation_from_data,
 )
+from .figures import generate_all_figures, generate_article_figures
 from .qa import run_quality_checks
 from .sensitivity import HAS_SALIB, SENSITIVITY_PROBLEM, run_sensitivity_analysis
 from .sites import build_site_masks, export_masks_geojson, load_sites
@@ -538,6 +539,71 @@ def hydro_sim(
                 else:
                     sensitivity_df.to_csv(output_path, index=False)
                 console.print(f"Indices sauvegardés dans {output_path}")
+
+
+@app.command("hydro-figures")
+def hydro_figures(
+    root: Optional[Path] = typer.Option(None, "--root", help="Chemin vers la racine du dépôt"),
+    summary: Path = typer.Option(Path("results/hydrology_summary.parquet"), help="Fichier de synthèse hydrologique"),
+    sites_csv: Optional[Path] = typer.Option(None, "--sites", help="CSV des sites PHES"),
+    figure_dir: Path = typer.Option(Path("results/figures"), help="Dossier de sortie pour les figures"),
+    reviewer_csv: Path = typer.Option(Path("results/hydrology_summary_excerpt.csv"), help="CSV réduit pour la revue"),
+) -> None:
+    """Génère les figures hydrologiques et un CSV synthétique pour la revue."""
+
+    paths = get_paths(root)
+    summary_path = _resolve_path(paths.root, summary) or summary
+    sites_path = _resolve_path(paths.root, sites_csv) if sites_csv else (paths.data_dir / DEFAULT_SITES_FILE)
+    figure_dir_path = _resolve_path(paths.root, figure_dir) or figure_dir
+    reviewer_csv_path = _resolve_path(paths.root, reviewer_csv) or reviewer_csv
+
+    outputs = generate_all_figures(summary_path, sites_path, figure_dir_path, reviewer_csv_path)
+    console.print("Figures et extrait CSV générés :")
+    for label, generated_path in outputs.items():
+        console.print(f" • {label}: {generated_path}")
+
+
+@app.command("article-figures")
+def article_figures(
+    root: Optional[Path] = typer.Option(None, "--root", help="Chemin vers la racine du dépôt"),
+    climate: Path = typer.Option(Path("results/climate_series.csv"), help="Séries climatiques agrégées"),
+    summary: Path = typer.Option(Path("results/hydrology_summary.parquet"), help="Fichier de synthèse hydrologique"),
+    sites_csv: Optional[Path] = typer.Option(None, "--sites", help="CSV des sites PHES"),
+    ahp_rankings: Path = typer.Option(Path("results/ahp_rankings.parquet"), help="Classement AHP calculé"),
+    figure_dir: Path = typer.Option(Path("results/figures"), help="Dossier de sortie pour les figures"),
+    deterministic: Optional[Path] = typer.Option(
+        None,
+        "--deterministic",
+        help="Fichier CSV/parquet contenant les bilans déterministes (facultatif)",
+    ),
+    figure7_pair: str = typer.Option(
+        "n10_e001_RES31412 & n10_e001_RES31520",
+        help="Identifiant du site utilisé pour la figure 7",
+    ),
+) -> None:
+    """Génère les figures 1, 2, 3, 7, 7b, 8 et 9 décrites dans l'article."""
+
+    paths = get_paths(root)
+    climate_path = _resolve_path(paths.root, climate) or climate
+    summary_path = _resolve_path(paths.root, summary) or summary
+    sites_path = _resolve_path(paths.root, sites_csv) if sites_csv else (paths.data_dir / DEFAULT_SITES_FILE)
+    ahp_path = _resolve_path(paths.root, ahp_rankings) or ahp_rankings
+    figure_dir_path = _resolve_path(paths.root, figure_dir) or figure_dir
+    deterministic_path = _resolve_path(paths.root, deterministic) if deterministic else None
+
+    outputs = generate_article_figures(
+        climate_path,
+        summary_path,
+        sites_path,
+        ahp_path,
+        figure_dir_path,
+        figure7_pair=figure7_pair,
+        deterministic_path=deterministic_path,
+    )
+
+    console.print("Figures générées :")
+    for label, generated_path in outputs.items():
+        console.print(f" • {label}: {generated_path}")
 
 
 @app.command()

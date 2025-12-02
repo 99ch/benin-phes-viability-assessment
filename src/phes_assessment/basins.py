@@ -28,12 +28,14 @@ from .sites import load_sites
 
 try:  # pragma: no cover - dépendance optionnelle
     from whitebox.whitebox_tools import WhiteboxTools
+    _HAS_WHITEBOX = True
 except ImportError:  # pragma: no cover
-    WhiteboxTools = None  # type: ignore[assignment]
+    WhiteboxTools = None  # type: ignore[assignment,misc]
+    _HAS_WHITEBOX = False
 
 
-def _ensure_whitebox() -> WhiteboxTools:
-    if WhiteboxTools is None:  # pragma: no cover - dépendance manquante
+def _ensure_whitebox():  # type: ignore[no-untyped-def]
+    if not _HAS_WHITEBOX:  # pragma: no cover - dépendance manquante
         raise RuntimeError(
             "Le module 'whitebox' est requis pour dériver les bassins versants. "
             "Installez-le via 'pip install whitebox' ou 'pip install -e .[full]'."
@@ -192,6 +194,15 @@ def delineate_site_basin(
         utm_epsg = utm_epsg_for_point(lat, lon)
         to_utm = Transformer.from_crs("EPSG:4326", f"EPSG:{utm_epsg}", always_xy=True)
         geom_utm = shapely_transform(to_utm.transform, geometry)
+        
+        # Calcul de l'aire en projection UTM
+        # LIMITATION : La projection UTM introduit une distorsion d'aire qui augmente
+        # avec la distance au méridien central de la zone. Pour le Bénin (6-12°N),
+        # l'erreur est typiquement < 1% près du méridien central mais peut atteindre
+        # 2-3% aux bords de la zone UTM. Pour une précision maximale, une projection
+        # équivalente (Equal Area) comme Albers ou Lambert Azimuthal pourrait être
+        # utilisée, mais l'erreur UTM reste acceptable pour une étude de faisabilité.
+        # Référence : Snyder (1987), Map Projections - A Working Manual, USGS PP 1395
         area_m2 = geom_utm.area
         if area_m2 <= 0:
             raise RuntimeError(f"Surface du bassin non valide pour {pair_identifier}")
